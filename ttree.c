@@ -95,8 +95,7 @@ static TernaryTreeNode _TT_search( TernaryTreeNode node, const char *s,
         else
         {
             s++;
-            if( !*s ) break;
-            ptr = ptr->mid;
+            if( *s ) ptr = ptr->mid;
         }
     }
     return (ptr && ptr->key) ? ptr : NULL;
@@ -199,7 +198,6 @@ static void _TT_keys( TernaryTreeNode node, void * data )
 {
     if( node->key ) (*(size_t*)data)++;
 }
-
 static void _TT_nodes( TernaryTreeNode node, void * data )
 {
     (*(size_t*)data)++;
@@ -243,6 +241,52 @@ size_t TT_nodes( TernaryTree tree )
     size_t nodes = 0;
     TT_walk( tree, _TT_nodes, &nodes );
     return nodes;
+}
+
+/*
+ *  Get sorted data from tree:
+ */
+static void _TT_sorted_data( TernaryTreeNode node, void * data )
+{
+    if( node->key )
+    {
+        struct
+        {
+            size_t idx;
+            TT_Data data;
+        }*ptr = data;
+        ptr->data[ptr->idx].key = node->key;
+        ptr->data[ptr->idx].data = node->data;
+        ptr->idx++;
+    }
+}
+TT_Data TT_sorted_data( TernaryTree tree )
+{
+    struct
+    {
+        size_t idx;
+        TT_Data data;
+    } data =
+    { 0 };
+    size_t i = 0;
+    size_t keys = TT_keys( tree );
+
+    data.data = calloc( sizeof(struct _TT_Data), keys );
+    if( !data.data ) return NULL;
+    TT_reverse_walk( tree, _TT_sorted_data, &data );
+
+    while( i < --keys )
+    {
+        char * k = data.data[i].key;
+        void * d = data.data[i].data;
+        data.data[i].key = data.data[keys].key;
+        data.data[i].data = data.data[keys].data;
+        data.data[keys].key = k;
+        data.data[keys].data = d;
+        i++;
+    }
+
+    return data.data;
 }
 
 /*
