@@ -19,6 +19,12 @@ typedef enum _TT_Flags
     TT_DEFAULTS = (TT_FAST_INSERT)
 } TT_Flags;
 
+typedef struct _TT_Data
+{
+    char * key;
+    void * data;
+} *TT_Data;
+
 typedef struct _TernaryTreeNode
 {
     char splitter;
@@ -67,6 +73,12 @@ int TT_delete( TernaryTree tree, const char * key );
 size_t TT_keys( TernaryTree tree );
 size_t TT_nodes( TernaryTree tree );
 size_t TT_depth( TernaryTree tree );
+
+/*
+ *  Get sorted data from tree. Return pointer to allocated TT_Data array
+ *  wich must be freed with free(), or NULL.
+ */
+TT_Data TT_sorted_data( TernaryTree tree );
 
 /*
  *  Tree walking and dumping stuff.
