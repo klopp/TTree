@@ -13,12 +13,9 @@
  */
 static TernaryTreeNode _TT_create_node( char c )
 {
-    TernaryTreeNode node = (TernaryTreeNode)calloc(
-            sizeof(struct _TernaryTreeNode), 1 );
+    TernaryTreeNode node = calloc( sizeof(struct _TernaryTreeNode), 1 );
     if( !node ) return NULL;
-
     node->splitter = c;
-    node->left = node->right = node->mid = NULL;
     return node;
 }
 
@@ -45,20 +42,20 @@ TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer )
 /*
  *  Destroy tree / delete tree node stuff:
  */
-static void _TT_destroy( TernaryTreeNode node, TT_Destroy destroyer )
+static void _TT_destroy( TernaryTreeNode node, TT_Destroy destroyer,
+        int delnode )
 {
-    if( node->left ) _TT_destroy( node->left, destroyer );
-    if( node->mid ) _TT_destroy( node->mid, destroyer );
-    if( node->right ) _TT_destroy( node->right, destroyer );
+    if( node->left ) _TT_destroy( node->left, destroyer, delnode );
+    if( node->mid ) _TT_destroy( node->mid, destroyer, delnode );
+    if( node->right ) _TT_destroy( node->right, destroyer, delnode );
     if( node->data && destroyer ) destroyer( node->data );
-    if( node->key ) memset( node->key, 0, strlen( node->key ) );
     free( node->key );
     memset( node, 0, sizeof(struct _TernaryTreeNode) );
-    free( node );
+    if( delnode ) free( node );
 }
 void TT_destroy( TernaryTree tree )
 {
-    _TT_destroy( tree->head, tree->destroyer );
+    _TT_destroy( tree->head, tree->destroyer, 1 );
     memset( tree, 0, sizeof(struct _TernaryTree) );
     free( tree );
 }
@@ -67,7 +64,7 @@ int TT_delete( TernaryTree tree, const char * key )
     struct _TernaryTreeNode * node = TT_search( tree, key );
     if( node )
     {
-        _TT_destroy( node, tree->destroyer );
+        _TT_destroy( node, tree->destroyer, 0 );
         return 1;
     }
     return 0;
@@ -114,10 +111,15 @@ static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
 {
     char c = (flags & TT_NOCASE) ? tolower( s[pos] ) : s[pos];
 
-    if( !node || (!node->splitter && !node->key) )
+    if( !node )
     {
         node = _TT_create_node( c );
         if( !node ) return NULL;
+    }
+    else if( !node->splitter && !node->key )
+    {
+        memset( node, 0, sizeof(struct _TernaryTreeNode) );
+        node->splitter = c;
     }
 
     if( c < node->splitter ) node->left = _TT_insert( node->left, s, pos, data,
@@ -151,7 +153,7 @@ TernaryTreeNode TT_insert( TernaryTree tree, const char *s, void * data )
             tree->destroyer );
 
     if( !tree->head->mid ) return NULL;
-    return (tree->flags & TT_FAST_INSERT) ?
+    return (tree->flags & TT_INSERT_FAST) ?
             tree->head : _TT_search( tree->head->mid, s, tree->flags );
 }
 
@@ -168,14 +170,25 @@ static void _TT_walk( TernaryTreeNode node, TT_Walk walker, void * data )
         walker( node, data );
     }
 }
-static void _TT_reverse_walk( TernaryTreeNode node, TT_Walk walker,
+static void _TT_walk_asc( TernaryTreeNode node, TT_Walk walker,
         void * data )
 {
     if( node )
     {
-        _TT_reverse_walk( node->right, walker, data );
-        _TT_reverse_walk( node->mid, walker, data );
-        _TT_reverse_walk( node->left, walker, data );
+        walker( node, data );
+        _TT_walk_asc( node->left, walker, data );
+        _TT_walk_asc( node->mid, walker, data );
+        _TT_walk_asc( node->right, walker, data );
+    }
+}
+static void _TT_walk_desc( TernaryTreeNode node, TT_Walk walker,
+        void * data )
+{
+    if( node )
+    {
+        _TT_walk_desc( node->right, walker, data );
+        _TT_walk_desc( node->mid, walker, data );
+        _TT_walk_desc( node->left, walker, data );
         walker( node, data );
     }
 }
@@ -183,9 +196,13 @@ void TT_walk( TernaryTree tree, TT_Walk walker, void * data )
 {
     if( tree ) _TT_walk( tree->head, walker, data );
 }
-void TT_reverse_walk( TernaryTree tree, TT_Walk walker, void * data )
+void TT_walk_asc( TernaryTree tree, TT_Walk walker, void * data )
 {
-    if( tree ) _TT_reverse_walk( tree->head, walker, data );
+    if( tree ) _TT_walk_asc( tree->head, walker, data );
+}
+void TT_walk_desc( TernaryTree tree, TT_Walk walker, void * data )
+{
+    if( tree ) _TT_walk_desc( tree->head, walker, data );
 }
 
 /*
@@ -246,7 +263,7 @@ size_t TT_nodes( TernaryTree tree )
 /*
  *  Get sorted data from tree:
  */
-static void _TT_sorted_data( TernaryTreeNode node, void * data )
+static void _TT_data( TernaryTreeNode node, void * data )
 {
     if( node->key )
     {
@@ -260,7 +277,7 @@ static void _TT_sorted_data( TernaryTreeNode node, void * data )
         ptr->idx++;
     }
 }
-TT_Data TT_sorted_data( TernaryTree tree )
+TT_Data TT_data( TernaryTree tree )
 {
     struct
     {
@@ -268,37 +285,25 @@ TT_Data TT_sorted_data( TernaryTree tree )
         TT_Data data;
     } data =
     { 0 };
-    size_t i = 0;
     size_t keys = TT_keys( tree );
-
+    if( !keys ) return NULL;
     data.data = calloc( sizeof(struct _TT_Data), keys );
     if( !data.data ) return NULL;
-    TT_reverse_walk( tree, _TT_sorted_data, &data );
-
-    while( i < --keys )
-    {
-        char * k = data.data[i].key;
-        void * d = data.data[i].data;
-        data.data[i].key = data.data[keys].key;
-        data.data[i].data = data.data[keys].data;
-        data.data[keys].key = k;
-        data.data[keys].data = d;
-        i++;
-    }
-
+    TT_walk_asc( tree, _TT_data, &data );
     return data.data;
 }
 
 /*
  *  Dump tree stuff:
  */
-static void _TT_dump( TernaryTreeNode node, char * indent, int last,
-        FILE * handle )
+static void _TT_dump( TernaryTreeNode node, char * indent,
+        int last, FILE * handle )
 {
+    int strip = 0;
     if( node->splitter )
     {
         fprintf( handle, "%s", indent );
-
+        strip++;
         if( last )
         {
             fprintf( handle, "+-" );
@@ -324,11 +329,12 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
     }
     if( node->left ) _TT_dump( node->left, indent,
             (node->right || node->mid) ? 0 : 1, handle );
-    if( node->mid ) _TT_dump( node->mid, indent, node->right ? 0 : 1, handle );
+    if( node->mid ) _TT_dump( node->mid, indent, node->right ? 0 : 1,
+            handle );
     if( node->right ) _TT_dump( node->right, indent, 1, handle );
-    indent[strlen( indent ) - 2] = 0;
+    if( strip ) indent[strlen(indent)-2] = 0;
 }
-void TT_dump( TernaryTree tree, FILE * handle )
+int TT_dump( TernaryTree tree, FILE * handle )
 {
     size_t depth = TT_depth( tree );
     char * buf = calloc( depth + 1, 2 );
@@ -336,7 +342,9 @@ void TT_dump( TernaryTree tree, FILE * handle )
     {
         fprintf( handle, "nodes: %u, keys: %u\n", TT_nodes( tree ),
                 TT_keys( tree ) );
-        _TT_dump( tree->head, buf, 1, handle );
+        _TT_dump( tree->head, buf, 0, handle );
         free( buf );
+        return 1;
     }
+    return 0;
 }
