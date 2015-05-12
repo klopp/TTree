@@ -5,6 +5,7 @@
  *  Created on: 11.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
+
 #include "ttree.h"
 
 static void t_print( TernaryTreeNode node, void * data )
