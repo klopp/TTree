@@ -40,14 +40,15 @@ int main()
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
 
+    printf( "\nTT_dump( tree, stdout ):\n" );
     TT_dump( tree, stdout );
 
-    printf( "TT_walk_desc( tree, ... ):\n");
+    printf( "TT_walk_desc( tree, ... ):\n" );
     TT_walk_desc( tree, t_print, NULL );
 
     data = TT_data( tree );
     keys = TT_keys( tree );
-    printf( "\nTT_data( tree ):\n");
+    printf( "\nTT_data( tree ):\n" );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", data[i].key );
     free( data );
