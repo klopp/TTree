@@ -14,9 +14,9 @@
 typedef enum _TT_Flags
 {
     TT_NOCASE = 0x01,           // ignore case for keys
-    TT_FAST_INSERT = 0x02,      // TT_insert() does not return added node
+    TT_INSERT_FAST = 0x02,      // TT_insert() does not return added node
     TT_INSERT_IGNORE = 0x04,    // TT_insert() does not replace existing data
-    TT_DEFAULTS = (TT_FAST_INSERT)
+    TT_DEFAULTS = (TT_INSERT_FAST)
 } TT_Flags;
 
 typedef struct _TT_Data
@@ -75,16 +75,17 @@ size_t TT_nodes( TernaryTree tree );
 size_t TT_depth( TernaryTree tree );
 
 /*
- *  Get sorted data from tree. Return pointer to allocated TT_Data array
- *  wich must be freed with free(), or NULL.
+ *  Get data from tree. Return pointer to allocated TT_Data array (sorted by
+ *  key) wich must be freed with free(), or NULL.
  */
-TT_Data TT_sorted_data( TernaryTree tree );
+TT_Data TT_data( TernaryTree tree );
 
 /*
  *  Tree walking and dumping stuff.
  */
 void TT_walk( TernaryTree tree, TT_Walk wakler, void * data );
-void TT_reverse_walk( TernaryTree tree, TT_Walk wakler, void * data );
-void TT_dump( TernaryTree tree, FILE * handle );
+void TT_walk_asc( TernaryTree tree, TT_Walk walker, void * data );
+void TT_walk_desc( TernaryTree tree, TT_Walk wakler, void * data );
+int TT_dump( TernaryTree tree, FILE * handle );
 
 #endif /* TTREE_H_ */
