@@ -1,5 +1,5 @@
 /*
- * ttest.c, examples of ttree usage
+ * ttest.c, examples of TernaryTree usage
  *
  *  Created on: 11.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
