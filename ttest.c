@@ -15,6 +15,7 @@ int main()
 {
     TT_Data data;
     size_t keys, i;
+    TernaryTreeNode node;
     TernaryTree tree = TT_create( TT_DEFAULTS, NULL );
 
     TT_insert( tree, "make", NULL );
@@ -33,7 +34,11 @@ int main()
     TT_insert( tree, "is", NULL );
     TT_insert( tree, "love", NULL );
 
+    node = TT_search( tree, "is" );
+    printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
     TT_delete( tree, "is" );
+    node = TT_search( tree, "is" );
+    printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
 
     TT_dump( tree, stdout );
 
