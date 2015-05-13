@@ -1,5 +1,5 @@
 /*
- * ttest.c, examples of TernaryTree usage
+ * main.c, examples of TernaryTree usage
  *
  *  Created on: 11.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
@@ -14,6 +14,7 @@ static void t_print( TernaryTreeNode node, void * data )
 int main()
 {
     TT_Data data;
+    TT_Data ptr;
     size_t keys, i;
     TernaryTreeNode node;
     TernaryTree tree = TT_create( TT_DEFAULTS, NULL );
@@ -46,11 +47,35 @@ int main()
     printf( "\nTT_walk_desc( tree, ... ):\n" );
     TT_walk_desc( tree, t_print, NULL );
 
-    data = TT_data( tree );
-    keys = TT_keys( tree );
     printf( "\nTT_data( tree ):\n" );
+    data = TT_data( tree );
+/*
+ *  1st way:
+ */
+    keys = TT_keys( tree );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", data[i].key );
+/*
+ *  2nd way:
+ */
+/*
+    ptr = data;
+    while( ptr && ptr->key )
+    {
+        printf( "%s\n", ptr->key );
+        ptr++;
+    }
+*/
+    free( data );
+
+    printf( "\nTT_lookup( tree, \"w\" ):\n" );
+    data = TT_lookup( tree, "w" );
+    ptr = data;
+    while( ptr && ptr->key )
+    {
+        printf( "%s\n", ptr->key );
+        ptr++;
+    }
     free( data );
 
     TT_destroy( tree );
