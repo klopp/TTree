@@ -279,7 +279,7 @@ static void _TT_data( TernaryTreeNode node, void * data )
         }
     }
 }
-TT_Data TT_data( TernaryTree tree )
+TT_Data TT_data( TernaryTree tree, size_t * count )
 {
     struct
     {
@@ -289,13 +289,17 @@ TT_Data TT_data( TernaryTree tree )
     } data =
     { 0 };
     size_t keys;
+
+    if( count ) *count = 0;
     if( !tree ) return NULL;
+
     keys = TT_keys( tree );
     if( !keys ) return NULL;
     data.data = calloc( sizeof(struct _TT_Data), keys + 1 );
     if( !data.data ) return NULL;
     data.max = ((size_t)-1);
     TT_walk_asc( tree, _TT_data, &data );
+    if( count ) *count = data.idx;
     return data.data;
 }
 
