@@ -30,6 +30,7 @@ typedef struct _TernaryTreeNode
     char splitter;
     char * key;
     void * data;
+    size_t depth;
     struct _TernaryTreeNode * left;
     struct _TernaryTreeNode * mid;
     struct _TernaryTreeNode * right;
