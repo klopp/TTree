@@ -396,7 +396,6 @@ TT_Data _TT_lookup( TernaryTree tree, const char * prefix, size_t max,
         TT_Data data;
     } data =
     { 0 };
-    size_t keys = 0;
 
     if( count ) *count = 0;
 
