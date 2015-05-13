@@ -23,7 +23,7 @@ typedef struct _TT_Data
 {
     char * key;
     void * data;
-} *TT_Data;
+}*TT_Data;
 
 typedef struct _TernaryTreeNode
 {
@@ -66,9 +66,12 @@ TernaryTreeNode TT_search( TernaryTree tree, const char * key );
 /*
  *  Lookup nodes with key started by prefix. Return pointer to allocated
  *  TT_Data array wich must freed by free() or NULL. Last element of
- *  returned array is { NULL, NULL }.
+ *  returned array is { NULL, NULL }. Set 'count' to array length if
+ *  'count' is not NULL.
  */
-TT_Data TT_lookup( TernaryTree tree, const char * prefix );
+TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count );
+TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
+        size_t * count );
 
 /*
  *  Delete tree node with specified key. Return 0 if node is not found, or 1.
