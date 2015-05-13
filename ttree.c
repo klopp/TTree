@@ -107,7 +107,8 @@ TernaryTreeNode TT_search( TernaryTree tree, const char *s )
  *  Insert nodes stuff:
  */
 static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
-        size_t pos, void * data, TT_Flags flags, TT_Destroy destroyer )
+        size_t pos, void * data, TT_Flags flags, TT_Destroy destroyer,
+        size_t depth )
 {
     char c = (flags & TT_NOCASE) ? tolower( s[pos] ) : s[pos];
 
@@ -115,21 +116,23 @@ static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
     {
         node = _TT_create_node( c );
         if( !node ) return NULL;
+        node->depth = depth;
     }
     else if( !node->splitter && !node->key )
     {
         memset( node, 0, sizeof(struct _TernaryTreeNode) );
         node->splitter = c;
+        node->depth = depth;
     }
 
     if( c < node->splitter ) node->left = _TT_insert( node->left, s, pos, data,
-            flags, destroyer );
+            flags, destroyer, depth + 1 );
     if( c == node->splitter )
     {
         if( *(s + pos + 1) > 0 )
         {
             node->mid = _TT_insert( node->mid, s, pos + 1, data, flags,
-                    destroyer );
+                    destroyer, depth + 1 );
         }
         else
         {
@@ -143,14 +146,14 @@ static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
         }
     }
     if( c > node->splitter ) node->right = _TT_insert( node->right, s, pos,
-            data, flags, destroyer );
+            data, flags, destroyer, depth + 1 );
     return node;
 }
 TernaryTreeNode TT_insert( TernaryTree tree, const char *s, void * data )
 {
     if( !tree || !tree->head || !s || !*s ) return NULL;
     tree->head->mid = _TT_insert( tree->head->mid, s, 0, data, tree->flags,
-            tree->destroyer );
+            tree->destroyer, 0 );
 
     if( !tree->head->mid ) return NULL;
     return (tree->flags & TT_INSERT_FAST) ?
@@ -219,31 +222,13 @@ static void _TT_nodes( TernaryTreeNode node, void * data )
 }
 static void _TT_depth( TernaryTreeNode node, void * data )
 {
-    if( node )
-    {
-        struct
-        {
-            size_t count;
-            size_t max;
-        }* ptr = data;
-        ptr->count++;
-        if( ptr->max < ptr->count ) ptr->max = ptr->count;
-        _TT_depth( node->left, data );
-        _TT_depth( node->mid, data );
-        _TT_depth( node->right, data );
-        ptr->count--;
-    }
+    if( node->depth > *(size_t*)data ) (*(size_t*)data)++;
 }
 size_t TT_depth( TernaryTree tree )
 {
-    struct
-    {
-        size_t count;
-        size_t max;
-    } data =
-    { 0, 0 };
-    if( tree ) TT_walk( tree, _TT_depth, &data );
-    return data.max;
+    size_t max = 0;
+    if( tree ) TT_walk( tree, _TT_depth, &max );
+    return max;
 }
 size_t TT_keys( TernaryTree tree )
 {
@@ -328,8 +313,7 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
         if( node->key )
         {
             fprintf( handle, "%c => [%s]\n",
-                    (isprint(node->splitter) ? node->splitter : '?'),
-                    node->key );
+                    (isprint(node->splitter) ? node->splitter : '?'), node->key );
         }
         else
         {
@@ -349,8 +333,8 @@ int TT_dump( TernaryTree tree, FILE * handle )
     char * buf = calloc( depth + 1, 2 );
     if( buf )
     {
-        fprintf( handle, "nodes: %u, keys: %u\n", TT_nodes( tree ),
-                TT_keys( tree ) );
+        fprintf( handle, "nodes: %u, keys: %u, depth: %u\n", TT_nodes( tree ),
+                TT_keys( tree ), TT_depth( tree ) );
         _TT_dump( tree->head, buf, 0, handle );
         free( buf );
         return 1;
