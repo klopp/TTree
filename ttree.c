@@ -267,18 +267,23 @@ static void _TT_data( TernaryTreeNode node, void * data )
     {
         struct
         {
+            size_t max;
             size_t idx;
             TT_Data data;
         }*ptr = data;
-        ptr->data[ptr->idx].key = node->key;
-        ptr->data[ptr->idx].data = node->data;
-        ptr->idx++;
+        if( ptr->idx < ptr->max )
+        {
+            ptr->data[ptr->idx].key = node->key;
+            ptr->data[ptr->idx].data = node->data;
+            ptr->idx++;
+        }
     }
 }
 TT_Data TT_data( TernaryTree tree )
 {
     struct
     {
+        size_t max;
         size_t idx;
         TT_Data data;
     } data =
@@ -289,6 +294,7 @@ TT_Data TT_data( TernaryTree tree )
     if( !keys ) return NULL;
     data.data = calloc( sizeof(struct _TT_Data), keys + 1 );
     if( !data.data ) return NULL;
+    data.max = ((size_t)-1);
     TT_walk_asc( tree, _TT_data, &data );
     return data.data;
 }
@@ -351,7 +357,7 @@ int TT_dump( TernaryTree tree, FILE * handle )
 /*
  *  Lookup stuff:
  */
-static TernaryTreeNode _TT_lookup( TernaryTreeNode node, const char *s,
+static TernaryTreeNode __TT_lookup( TernaryTreeNode node, const char *s,
         TT_Flags flags )
 {
     TernaryTreeNode ptr = node;
@@ -375,28 +381,42 @@ static TernaryTreeNode _TT_lookup( TernaryTreeNode node, const char *s,
     }
     return ptr;
 }
-TT_Data TT_lookup( TernaryTree tree, const char * prefix )
+TT_Data _TT_lookup( TernaryTree tree, const char * prefix, size_t max,
+        size_t * count )
 {
     TernaryTreeNode node;
     struct
     {
+        size_t max;
         size_t idx;
         TT_Data data;
     } data =
     { 0 };
     size_t keys = 0;
 
+    if( count ) *count = 0;
+
     if( !tree || !prefix || !*prefix ) return NULL;
-    node = _TT_lookup( tree->head->mid, prefix, tree->flags );
+    node = __TT_lookup( tree->head->mid, prefix, tree->flags );
     if( !node || !node->mid ) return NULL;
 
-    _TT_walk( node->mid, _TT_keys, &keys );
-    if( !keys ) return NULL;
-
-    data.data = calloc( sizeof(struct _TT_Data), keys + 1 );
+    data.data = calloc( sizeof(struct _TT_Data), max + 1 );
     if( !data.data ) return NULL;
 
+    data.max = max;
     _TT_walk( node->mid, _TT_data, &data );
+    if( count ) *count = data.idx;
+
     return data.data;
 }
 
+TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count )
+{
+    return _TT_lookup( tree, prefix, ((size_t)-1), count );
+}
+
+TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
+        size_t * count )
+{
+    return _TT_lookup( tree, prefix, max, count );
+}
