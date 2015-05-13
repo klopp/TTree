@@ -403,6 +403,8 @@ TT_Data _TT_lookup( TernaryTree tree, const char * prefix, size_t max,
     node = __TT_lookup( tree->head->mid, prefix, tree->flags );
     if( !node || !node->mid ) return NULL;
 
+    if( !max ) max = TT_keys( tree );
+
     data.data = calloc( sizeof(struct _TT_Data), max + 1 );
     if( !data.data ) return NULL;
 
@@ -415,7 +417,7 @@ TT_Data _TT_lookup( TernaryTree tree, const char * prefix, size_t max,
 
 TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count )
 {
-    return _TT_lookup( tree, prefix, ((size_t)-1), count );
+    return _TT_lookup( tree, prefix, 0, count );
 }
 
 TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
