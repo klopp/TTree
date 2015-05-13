@@ -58,10 +58,18 @@ void TT_destroy( TernaryTree tree );
  *  replaced. Return NULL if operation fails.
  */
 TernaryTreeNode TT_insert( TernaryTree tree, const char * key, void * data );
+
 /*
  *  Search tree node with specified key. Return found node pointer or NULL.
  */
 TernaryTreeNode TT_search( TernaryTree tree, const char * key );
+/*
+ *  Lookup nodes with key started by prefix. Return pointer to allocated
+ *  TT_Data array wich must freed by free() or NULL. Last element of
+ *  returned array is { NULL, NULL }.
+ */
+TT_Data TT_lookup( TernaryTree tree, const char * prefix );
+
 /*
  *  Delete tree node with specified key. Return 0 if node is not found, or 1.
  */
@@ -76,7 +84,8 @@ size_t TT_depth( TernaryTree tree );
 
 /*
  *  Get data from tree. Return pointer to allocated TT_Data array (sorted by
- *  key) wich must be freed with free(), or NULL.
+ *  key) wich must be freed with free(), or NULL. Last element of returned
+ *  array is { NULL, NULL }.
  */
 TT_Data TT_data( TernaryTree tree );
 
