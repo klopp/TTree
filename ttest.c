@@ -48,17 +48,27 @@ int main()
     TT_walk_desc( tree, t_print, NULL );
 
     printf( "\nTT_data( tree ):\n" );
-/*
- *  1st way:
- */
-    data = TT_data( tree, &keys );
+    /*
+     *  1st way:
+     */
+    data = TT_data( tree, NULL );
+    keys = TT_keys( tree );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", data[i].key );
+
 /*
  *  2nd way:
  */
 /*
-    data = TT_data( tree, NULL );
+    data = TT_data( tree, &keys );
+    for( i = 0; i < keys; i++ )
+        printf( "%s\n", data[i].key );
+*/
+
+/*
+ *  3d way:
+ */
+/*
     ptr = data;
     while( ptr && ptr->key )
     {
@@ -69,7 +79,7 @@ int main()
     free( data );
 
     printf( "\nTT_lookup( tree, \"w\" ):\n" );
-    data = TT_lookup( tree, "w", NULL );
+    data = TT_lookup( tree, "w", &keys );
     ptr = data;
     while( ptr && ptr->key )
     {
