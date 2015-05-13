@@ -66,7 +66,7 @@ int main()
 */
 
 /*
- *  3d way:
+ *  3rd way:
  */
 /*
     ptr = data;
