@@ -90,7 +90,7 @@ size_t TT_depth( TernaryTree tree );
  *  key) wich must be freed with free(), or NULL. Last element of returned
  *  array is { NULL, NULL }.
  */
-TT_Data TT_data( TernaryTree tree );
+TT_Data TT_data( TernaryTree tree, size_t * count );
 
 /*
  *  Tree walking and dumping stuff.
