@@ -222,7 +222,7 @@ static void _TT_nodes( TernaryTreeNode node, void * data )
 }
 static void _TT_depth( TernaryTreeNode node, void * data )
 {
-    if( node->depth > *(size_t*)data ) (*(size_t*)data)++;
+    if( node->depth > *(size_t*)data ) (*(size_t*)data) = node->depth;
 }
 size_t TT_depth( TernaryTree tree )
 {
