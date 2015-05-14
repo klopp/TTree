@@ -317,13 +317,13 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
 
         if( node->key )
         {
-            fprintf( handle, "%c {%u} => [%s]\n",
-                    (isprint(node->splitter) ? node->splitter : '?'), node->depth, node->key );
+            fprintf( handle, "%c => [%s]\n",
+                    (isprint(node->splitter) ? node->splitter : '?'), node->key );
         }
         else
         {
-            fprintf( handle, "%c {%u} => ()\n",
-                    (isprint(node->splitter) ? node->splitter : '?'), node->depth );
+            fprintf( handle, "%c => ()\n",
+                    (isprint(node->splitter) ? node->splitter : '?') );
         }
     }
     if( node->left ) _TT_dump( node->left, indent,
