@@ -55,9 +55,14 @@ static void _TT_destroy( TernaryTreeNode node, TT_Destroy destroyer,
 }
 void TT_destroy( TernaryTree tree )
 {
-    _TT_destroy( tree->head, tree->destroyer, 1 );
+    if( tree->head ) _TT_destroy( tree->head, tree->destroyer, 1 );
     memset( tree, 0, sizeof(struct _TernaryTree) );
     free( tree );
+}
+void TT_clear( TernaryTree tree )
+{
+    _TT_destroy( tree->head->mid, tree->destroyer, 1 );
+    tree->head->mid = NULL;
 }
 int TT_delete( TernaryTree tree, const char * key )
 {
@@ -298,7 +303,7 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
     if( node->splitter )
     {
         fprintf( handle, "%s", indent );
-        strip++;
+        strip = strlen( indent );
         if( last )
         {
             fprintf( handle, "+-" );
@@ -312,25 +317,25 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
 
         if( node->key )
         {
-            fprintf( handle, "%c => [%s]\n",
-                    (isprint(node->splitter) ? node->splitter : '?'), node->key );
+            fprintf( handle, "%c {%u} => [%s]\n",
+                    (isprint(node->splitter) ? node->splitter : '?'), node->depth, node->key );
         }
         else
         {
-            fprintf( handle, "%c => ()\n",
-                    (isprint(node->splitter) ? node->splitter : '?') );
+            fprintf( handle, "%c {%u} => ()\n",
+                    (isprint(node->splitter) ? node->splitter : '?'), node->depth );
         }
     }
     if( node->left ) _TT_dump( node->left, indent,
             (node->right || node->mid) ? 0 : 1, handle );
     if( node->mid ) _TT_dump( node->mid, indent, node->right ? 0 : 1, handle );
     if( node->right ) _TT_dump( node->right, indent, 1, handle );
-    if( strip ) indent[strlen( indent ) - 2] = 0;
+    if( strip ) indent[strip] = 0;
 }
 int TT_dump( TernaryTree tree, FILE * handle )
 {
     size_t depth = TT_depth( tree );
-    char * buf = calloc( depth + 1, 2 );
+    char * buf = calloc( depth + 2, 2 );
     if( buf )
     {
         fprintf( handle, "nodes: %u, keys: %u, depth: %u\n", TT_nodes( tree ),
@@ -403,7 +408,6 @@ TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count )
 {
     return _TT_lookup( tree, prefix, 0, count );
 }
-
 TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
         size_t * count )
 {
