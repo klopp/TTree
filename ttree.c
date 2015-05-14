@@ -318,7 +318,8 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
         if( node->key )
         {
             fprintf( handle, "%c => [%s]\n",
-                    (isprint(node->splitter) ? node->splitter : '?'), node->key );
+                    (isprint(node->splitter) ? node->splitter : '?'),
+                    node->key );
         }
         else
         {

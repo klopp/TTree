@@ -56,43 +56,43 @@ int main()
     for( i = 0; i < keys; i++ )
         printf( "%s\n", data[i].key );
 
-/*
- *  2nd way:
- */
-/*
-    data = TT_data( tree, &keys );
-    for( i = 0; i < keys; i++ )
-        printf( "%s\n", data[i].key );
-*/
+    /*
+     *  2nd way:
+     */
+    /*
+     data = TT_data( tree, &keys );
+     for( i = 0; i < keys; i++ )
+     printf( "%s\n", data[i].key );
+     */
 
-/*
- *  3rd way:
- */
-/*
-    ptr = data;
-    while( ptr && ptr->key )
-    {
-        printf( "%s\n", ptr->key );
-        ptr++;
-    }
-*/
+    /*
+     *  3rd way:
+     */
+    /*
+     ptr = data;
+     while( ptr && ptr->key )
+     {
+     printf( "%s\n", ptr->key );
+     ptr++;
+     }
+     */
     free( data );
 
     printf( "\nTT_lookup( tree, \"w\" ):\n" );
     data = TT_lookup( tree, "w", &keys );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", data[i].key );
-/*
- *  OR
- */
-/*
-    ptr = data;
-    while( ptr && ptr->key )
-    {
-        printf( "%s\n", ptr->key );
-        ptr++;
-    }
-*/
+    /*
+     *  OR
+     */
+    /*
+     ptr = data;
+     while( ptr && ptr->key )
+     {
+     printf( "%s\n", ptr->key );
+     ptr++;
+     }
+     */
     free( data );
 
     TT_destroy( tree );
