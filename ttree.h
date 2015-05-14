@@ -74,6 +74,10 @@ TernaryTreeNode TT_search( TernaryTree tree, const char * key );
 TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count );
 TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
         size_t * count );
+/*
+ *  Lookup nodes with key started by prefix in new tree.
+ */
+TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix );
 
 /*
  *  Delete tree node with specified key. Return 0 if node is not found, or 1.
