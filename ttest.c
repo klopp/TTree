@@ -17,6 +17,7 @@ int main()
 /*    TT_Data ptr;*/
     size_t keys, i;
     TernaryTreeNode node;
+    TernaryTree rc;
     TernaryTree tree = TT_create( TT_DEFAULTS, NULL );
 
     TT_insert( tree, "make", NULL );
@@ -94,6 +95,10 @@ int main()
      }
      */
     free( data );
+
+    printf( "\nTT_lookup_tree( tree, \"w\" ):\n" );
+    rc = TT_lookup_tree( tree, "w" );
+    TT_dump( rc, stdout );
 
     TT_destroy( tree );
 

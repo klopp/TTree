@@ -414,3 +414,20 @@ TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
 {
     return _TT_lookup( tree, prefix, max, count );
 }
+
+TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix  )
+{
+    TernaryTree rc = TT_create( tree->flags, NULL );
+    TT_Data data, ptr;
+    if( !rc ) return NULL;
+    data = TT_lookup( tree, prefix, NULL );
+    ptr = data;
+    while( ptr && ptr->key )
+    {
+        TT_insert( rc, ptr->key, ptr->data );
+        ptr++;
+    }
+
+    return rc;
+}
+
