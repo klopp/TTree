@@ -158,7 +158,7 @@ TernaryTreeNode TT_insert( TernaryTree tree, const char *s, void * data )
 {
     if( !tree || !tree->head || !s || !*s ) return NULL;
     tree->head->mid = _TT_insert( tree->head->mid, s, 0, data, tree->flags,
-            tree->destroyer, 0 );
+            tree->destroyer, 1 );
 
     if( !tree->head->mid ) return NULL;
     return (tree->flags & TT_INSERT_FAST) ?
@@ -335,7 +335,7 @@ static void _TT_dump( TernaryTreeNode node, char * indent, int last,
 int TT_dump( TernaryTree tree, FILE * handle )
 {
     size_t depth = TT_depth( tree );
-    char * buf = calloc( depth + 2, 2 );
+    char * buf = calloc( depth + 1, 2 );
     if( buf )
     {
         fprintf( handle, "nodes: %u, keys: %u, depth: %u\n", TT_nodes( tree ),
