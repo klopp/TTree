@@ -50,6 +50,7 @@ typedef struct _TernaryTree
  *  Create and destroy tree:
  */
 TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer );
+void TT_clear( TernaryTree tree );
 void TT_destroy( TernaryTree tree );
 
 /*
