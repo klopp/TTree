@@ -14,7 +14,7 @@ static void tt_print( TernaryTreeNode node, void * data )
 int main()
 {
     TT_Data data;
-    TT_Data ptr;
+/*    TT_Data ptr;*/
     size_t keys, i;
     TernaryTreeNode node;
     TernaryTree tree = TT_create( TT_DEFAULTS, NULL );
