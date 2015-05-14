@@ -6,7 +6,7 @@
  */
 #include "ttree.h"
 
-static void t_print( TernaryTreeNode node, void * data )
+static void tt_print( TernaryTreeNode node, void * data )
 {
     if( node->key ) printf( "%s\n", node->key );
 }
@@ -45,7 +45,7 @@ int main()
     TT_dump( tree, stdout );
 
     printf( "\nTT_walk_desc( tree, ... ):\n" );
-    TT_walk_desc( tree, t_print, NULL );
+    TT_walk_desc( tree, tt_print, NULL );
 
     printf( "\nTT_data( tree ):\n" );
     /*
@@ -89,5 +89,6 @@ int main()
     free( data );
 
     TT_destroy( tree );
+
     return 0;
 }
