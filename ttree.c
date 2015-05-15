@@ -22,7 +22,7 @@ static TernaryTreeNode _TT_create_node( char c )
 /*
  *  Create empty tree:
  */
-TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer )
+TernaryTree TT_create( TT_Flags flags, TT_Destroy destructor )
 {
     TernaryTree tree = calloc( sizeof(struct _TernaryTree), 1 );
     if( tree )
@@ -31,7 +31,7 @@ TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer )
         if( tree->head )
         {
             tree->flags = flags;
-            tree->destroyer = destroyer;
+            tree->destructor = destructor;
             return tree;
         }
         free( tree );
@@ -42,26 +42,26 @@ TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer )
 /*
  *  Destroy tree / delete tree node stuff:
  */
-static void _TT_destroy( TernaryTreeNode node, TT_Destroy destroyer,
+static void _TT_destroy( TernaryTreeNode node, TT_Destroy destructor,
         int delnode )
 {
-    if( node->left ) _TT_destroy( node->left, destroyer, delnode );
-    if( node->mid ) _TT_destroy( node->mid, destroyer, delnode );
-    if( node->right ) _TT_destroy( node->right, destroyer, delnode );
-    if( node->data && destroyer ) destroyer( node->data );
+    if( node->left ) _TT_destroy( node->left, destructor, delnode );
+    if( node->mid ) _TT_destroy( node->mid, destructor, delnode );
+    if( node->right ) _TT_destroy( node->right, destructor, delnode );
+    if( node->data && destructor ) destructor( node->data );
     free( node->key );
     memset( node, 0, sizeof(struct _TernaryTreeNode) );
     if( delnode ) free( node );
 }
 void TT_destroy( TernaryTree tree )
 {
-    if( tree->head ) _TT_destroy( tree->head, tree->destroyer, 1 );
+    if( tree->head ) _TT_destroy( tree->head, tree->destructor, 1 );
     memset( tree, 0, sizeof(struct _TernaryTree) );
     free( tree );
 }
 void TT_clear( TernaryTree tree )
 {
-    _TT_destroy( tree->head->mid, tree->destroyer, 1 );
+    _TT_destroy( tree->head->mid, tree->destructor, 1 );
     tree->head->mid = NULL;
 }
 int TT_delete( TernaryTree tree, const char * key )
@@ -69,7 +69,7 @@ int TT_delete( TernaryTree tree, const char * key )
     struct _TernaryTreeNode * node = TT_search( tree, key );
     if( node )
     {
-        _TT_destroy( node, tree->destroyer, 0 );
+        _TT_destroy( node, tree->destructor, 0 );
         return 1;
     }
     return 0;
@@ -112,7 +112,7 @@ TernaryTreeNode TT_search( TernaryTree tree, const char *s )
  *  Insert nodes stuff:
  */
 static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
-        size_t pos, void * data, TT_Flags flags, TT_Destroy destroyer,
+        size_t pos, void * data, TT_Flags flags, TT_Destroy destructor,
         size_t depth )
 {
     char c = (flags & TT_NOCASE) ? tolower( s[pos] ) : s[pos];
@@ -131,13 +131,13 @@ static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
     }
 
     if( c < node->splitter ) node->left = _TT_insert( node->left, s, pos, data,
-            flags, destroyer, depth + 1 );
+            flags, destructor, depth + 1 );
     if( c == node->splitter )
     {
         if( *(s + pos + 1) > 0 )
         {
             node->mid = _TT_insert( node->mid, s, pos + 1, data, flags,
-                    destroyer, depth + 1 );
+                    destructor, depth + 1 );
         }
         else
         {
@@ -145,20 +145,20 @@ static TernaryTreeNode _TT_insert( TernaryTreeNode node, const char *s,
             if( !node->key ) return NULL;
             if( !(flags & TT_INSERT_IGNORE) )
             {
-                if( node->data && destroyer ) destroyer( node->data );
+                if( node->data && destructor ) destructor( node->data );
                 node->data = data;
             }
         }
     }
     if( c > node->splitter ) node->right = _TT_insert( node->right, s, pos,
-            data, flags, destroyer, depth + 1 );
+            data, flags, destructor, depth + 1 );
     return node;
 }
 TernaryTreeNode TT_insert( TernaryTree tree, const char *s, void * data )
 {
     if( !tree || !tree->head || !s || !*s ) return NULL;
     tree->head->mid = _TT_insert( tree->head->mid, s, 0, data, tree->flags,
-            tree->destroyer, 1 );
+            tree->destructor, 1 );
 
     if( !tree->head->mid ) return NULL;
     return (tree->flags & TT_INSERT_FAST) ?
@@ -415,7 +415,7 @@ TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
     return _TT_lookup( tree, prefix, max, count );
 }
 
-TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix  )
+TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix )
 {
     TernaryTree rc = TT_create( tree->flags, NULL );
     TT_Data data, ptr;
@@ -427,6 +427,7 @@ TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix  )
         TT_insert( rc, ptr->key, ptr->data );
         ptr++;
     }
+    free( data );
 
     return rc;
 }

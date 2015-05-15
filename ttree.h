@@ -42,14 +42,14 @@ typedef void (*TT_Walk)( TernaryTreeNode node, void * data );
 typedef struct _TernaryTree
 {
     TT_Flags flags;
-    TT_Destroy destroyer;
+    TT_Destroy destructor;
     TernaryTreeNode head;
 }*TernaryTree;
 
 /*
  *  Create and destroy tree:
  */
-TernaryTree TT_create( TT_Flags flags, TT_Destroy destroyer );
+TernaryTree TT_create( TT_Flags flags, TT_Destroy destructor );
 void TT_clear( TernaryTree tree );
 void TT_destroy( TernaryTree tree );
 
@@ -75,7 +75,8 @@ TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count );
 TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
         size_t * count );
 /*
- *  Lookup nodes with key started by prefix in new tree.
+ *  Lookup nodes with key started by prefix in new tree. Field 'destructor' in
+ *  new tree is NULL.
  */
 TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix );
 
