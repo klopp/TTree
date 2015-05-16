@@ -6,7 +6,7 @@
  */
 #include "ttree.h"
 
-static void tt_print( TernaryTreeNode node, void * data )
+static void tt_print( TTNode node, void * data )
 {
     if( node->key ) printf( "%s\n", node->key );
 }
@@ -16,9 +16,9 @@ int main()
     TT_Data data;
 /*    TT_Data ptr;*/
     size_t keys, i;
-    TernaryTreeNode node;
-    TernaryTree rc;
-    TernaryTree tree = TT_create( TT_DEFAULTS, NULL );
+    TTNode node;
+    TTree rc;
+    TTree tree = TT_create( TT_DEFAULTS, NULL );
 
     TT_insert( tree, "make", NULL );
     TT_insert( tree, "love", NULL );
@@ -99,6 +99,7 @@ int main()
     printf( "\nTT_lookup_tree( tree, \"w\" ):\n" );
     rc = TT_lookup_tree( tree, "w" );
     TT_dump( rc, stdout );
+    TT_destroy( rc );
 
     TT_destroy( tree );
 

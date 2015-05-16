@@ -25,33 +25,33 @@ typedef struct _TT_Data
     void * data;
 }*TT_Data;
 
-typedef struct _TernaryTreeNode
+typedef struct _TTNode
 {
     char splitter;
     char * key;
     void * data;
     size_t depth;
-    struct _TernaryTreeNode * left;
-    struct _TernaryTreeNode * mid;
-    struct _TernaryTreeNode * right;
-}*TernaryTreeNode;
+    struct _TTNode * left;
+    struct _TTNode * mid;
+    struct _TTNode * right;
+}*TTNode;
 
 typedef void (*TT_Destroy)( void * data );
-typedef void (*TT_Walk)( TernaryTreeNode node, void * data );
+typedef void (*TT_Walk)( TTNode node, void * data );
 
 typedef struct _TernaryTree
 {
     TT_Flags flags;
     TT_Destroy destructor;
-    TernaryTreeNode head;
-}*TernaryTree;
+    TTNode head;
+}*TTree;
 
 /*
  *  Create and destroy tree:
  */
-TernaryTree TT_create( TT_Flags flags, TT_Destroy destructor );
-void TT_clear( TernaryTree tree );
-void TT_destroy( TernaryTree tree );
+TTree TT_create( TT_Flags flags, TT_Destroy destructor );
+void TT_clear( TTree tree );
+void TT_destroy( TTree tree );
 
 /*
  *  Insert key / data pair. Data may be NULL. On succcess return inserted
@@ -59,52 +59,52 @@ void TT_destroy( TernaryTree tree );
  *  TT_INSERT_IGNORE flag is NOT set existing data will be destroyed and
  *  replaced. Return NULL if operation fails.
  */
-TernaryTreeNode TT_insert( TernaryTree tree, const char * key, void * data );
+TTNode TT_insert( TTree tree, const char * key, void * data );
 
 /*
  *  Search tree node with specified key. Return found node pointer or NULL.
  */
-TernaryTreeNode TT_search( TernaryTree tree, const char * key );
+TTNode TT_search( TTree tree, const char * key );
 /*
  *  Lookup nodes with key started by prefix. Return pointer to allocated
  *  TT_Data array wich must freed by free() or NULL. Last element of
  *  returned array is { NULL, NULL }. Set 'count' to array length if
  *  'count' is not NULL.
  */
-TT_Data TT_lookup( TernaryTree tree, const char * prefix, size_t * count );
-TT_Data TT_nlookup( TernaryTree tree, const char * prefix, size_t max,
+TT_Data TT_lookup( TTree tree, const char * prefix, size_t * count );
+TT_Data TT_nlookup( TTree tree, const char * prefix, size_t max,
         size_t * count );
 /*
  *  Lookup nodes with key started by prefix in new tree. Field 'destructor' in
  *  new tree is NULL.
  */
-TernaryTree TT_lookup_tree( TernaryTree tree, const char * prefix );
+TTree TT_lookup_tree( TTree tree, const char * prefix );
 
 /*
  *  Delete tree node with specified key. Return 0 if node is not found, or 1.
  */
-int TT_delete( TernaryTree tree, const char * key );
+int TT_delete( TTree tree, const char * key );
 
 /*
  *  Get tree information.
  */
-size_t TT_keys( TernaryTree tree );
-size_t TT_nodes( TernaryTree tree );
-size_t TT_depth( TernaryTree tree );
+size_t TT_keys( TTree tree );
+size_t TT_nodes( TTree tree );
+size_t TT_depth( TTree tree );
 
 /*
  *  Get data from tree. Return pointer to allocated TT_Data array (sorted by
  *  key) wich must be freed with free(), or NULL. Last element of returned
  *  array is { NULL, NULL }.
  */
-TT_Data TT_data( TernaryTree tree, size_t * count );
+TT_Data TT_data( TTree tree, size_t * count );
 
 /*
  *  Tree walking and dumping stuff.
  */
-void TT_walk( TernaryTree tree, TT_Walk wakler, void * data );
-void TT_walk_asc( TernaryTree tree, TT_Walk walker, void * data );
-void TT_walk_desc( TernaryTree tree, TT_Walk wakler, void * data );
-int TT_dump( TernaryTree tree, FILE * handle );
+void TT_walk( TTree tree, TT_Walk wakler, void * data );
+void TT_walk_asc( TTree tree, TT_Walk walker, void * data );
+void TT_walk_desc( TTree tree, TT_Walk wakler, void * data );
+int TT_dump( TTree tree, FILE * handle );
 
 #endif /* TTREE_H_ */
