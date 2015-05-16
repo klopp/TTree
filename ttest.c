@@ -14,27 +14,28 @@ static void tt_print( TTNode node, void * data )
 int main()
 {
     TT_Data data;
-/*    TT_Data ptr;*/
+    char ** sdata;
+    /*    TT_Data ptr;*/
     size_t keys, i;
     TTNode node;
     TTree rc;
-    TTree tree = TT_create( TT_DEFAULTS, NULL );
+    TTree tree = TS_create( TT_DEFAULTS );
 
-    TT_insert( tree, "make", NULL );
-    TT_insert( tree, "love", NULL );
-    TT_insert( tree, "not", NULL );
-    TT_insert( tree, "war", NULL );
+    TS_insert( tree, "make" );
+    TS_insert( tree, "love" );
+    TS_insert( tree, "not" );
+    TS_insert( tree, "war" );
 
-    TT_insert( tree, "bird", NULL );
-    TT_insert( tree, "is", NULL );
-    TT_insert( tree, "the", NULL );
-    TT_insert( tree, "word", NULL );
+    TS_insert( tree, "bird" );
+    TS_insert( tree, "is" );
+    TS_insert( tree, "the" );
+    TS_insert( tree, "word" );
 
-    TT_insert( tree, "all", NULL );
-    TT_insert( tree, "you", NULL );
-    TT_insert( tree, "need", NULL );
-    TT_insert( tree, "is", NULL );
-    TT_insert( tree, "love", NULL );
+    TS_insert( tree, "all" );
+    TS_insert( tree, "you" );
+    TS_insert( tree, "need" );
+    TS_insert( tree, "is" );
+    TS_insert( tree, "love" );
 
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
@@ -46,55 +47,55 @@ int main()
     TT_dump( tree, stdout );
 
     printf( "\nTT_walk_desc( tree, ... ):\n" );
-    TT_walk_desc( tree, tt_print, NULL );
+    TS_walk_desc( tree, tt_print );
 
-    printf( "\nTT_data( tree ):\n" );
+    printf( "\nTS_data( tree ):\n" );
     /*
      *  1st way:
      */
-    data = TT_data( tree, NULL );
+    sdata = TS_data( tree, NULL );
     keys = TT_keys( tree );
     for( i = 0; i < keys; i++ )
-        printf( "%s\n", data[i].key );
+        printf( "%s\n", sdata[i] );
 
     /*
      *  2nd way:
      */
     /*
-     data = TT_data( tree, &keys );
+     sdata = TS_data( tree, &keys );
      for( i = 0; i < keys; i++ )
-     printf( "%s\n", data[i].key );
+     printf( "%s\n", sdata[i] );
      */
 
     /*
      *  3rd way:
      */
     /*
-     ptr = data;
-     while( ptr && ptr->key )
+     ptr = sdata;
+     while( ptr && *ptr )
      {
-     printf( "%s\n", ptr->key );
+     printf( "%s\n", ptr );
      ptr++;
      }
      */
-    free( data );
+    free( sdata );
 
-    printf( "\nTT_lookup( tree, \"w\" ):\n" );
-    data = TT_lookup( tree, "w", &keys );
+    printf( "\nTS_lookup( tree, \"w\" ):\n" );
+    sdata = TS_lookup( tree, "w", &keys );
     for( i = 0; i < keys; i++ )
-        printf( "%s\n", data[i].key );
+        printf( "%s\n", sdata[i] );
     /*
      *  OR
      */
     /*
-     ptr = data;
-     while( ptr && ptr->key )
+     ptr = sdata;
+     while( ptr && ptr )
      {
-     printf( "%s\n", ptr->key );
+     printf( "%s\n", ptr );
      ptr++;
      }
      */
-    free( data );
+    free( sdata );
 
     printf( "\nTT_lookup_tree( tree, \"w\" ):\n" );
     rc = TT_lookup_tree( tree, "w" );

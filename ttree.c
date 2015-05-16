@@ -293,6 +293,47 @@ TT_Data TT_data( TTree tree, size_t * count )
     return data.data;
 }
 
+static void _TS_data( TTNode node, void * data )
+{
+    if( node->key )
+    {
+        struct
+        {
+            size_t max;
+            size_t idx;
+            char ** data;
+        }*ptr = data;
+        if( ptr->idx < ptr->max )
+        {
+            ptr->data[ptr->idx] = node->key;
+            ptr->idx++;
+        }
+    }
+}
+char ** TS_data( TTree tree, size_t * count )
+{
+    struct
+    {
+        size_t max;
+        size_t idx;
+        char ** data;
+    } data =
+    { 0 };
+    size_t keys;
+
+    if( count ) *count = 0;
+    if( !tree ) return NULL;
+
+    keys = TT_keys( tree );
+    if( !keys ) return NULL;
+    data.data = calloc( sizeof(char *), keys + 1 );
+    if( !data.data ) return NULL;
+    data.max = ((size_t)-1);
+    TT_walk_asc( tree, _TS_data, &data );
+    if( count ) *count = data.idx;
+    return data.data;
+}
+
 /*
  *  Dump tree stuff:
  */
@@ -399,7 +440,37 @@ static TT_Data _TT_lookup( TTree tree, const char * prefix, size_t max,
     if( !data.data ) return NULL;
 
     data.max = max;
-    _TT_walk( node->mid, _TT_data, &data );
+    _TT_walk_asc( node->mid, _TT_data, &data );
+    if( count ) *count = data.idx;
+
+    return data.data;
+}
+
+static char ** _TS_lookup( TTree tree, const char * prefix, size_t max,
+        size_t * count )
+{
+    TTNode node;
+    struct
+    {
+        size_t max;
+        size_t idx;
+        char ** data;
+    } data =
+    { 0 };
+
+    if( count ) *count = 0;
+
+    if( !tree || !prefix || !*prefix ) return NULL;
+    node = __TT_lookup( tree->head->mid, prefix, tree->flags );
+    if( !node || !node->mid ) return NULL;
+
+    if( !max ) max = TT_keys( tree );
+
+    data.data = calloc( sizeof(char *), max + 1 );
+    if( !data.data ) return NULL;
+
+    data.max = max;
+    _TT_walk_asc( node->mid, _TS_data, &data );
     if( count ) *count = data.idx;
 
     return data.data;
@@ -413,6 +484,16 @@ TT_Data TT_nlookup( TTree tree, const char * prefix, size_t max,
         size_t * count )
 {
     return _TT_lookup( tree, prefix, max, count );
+}
+
+char ** TS_lookup( TTree tree, const char * prefix, size_t * count )
+{
+    return _TS_lookup( tree, prefix, 0, count );
+}
+char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
+        size_t * count )
+{
+    return _TS_lookup( tree, prefix, max, count );
 }
 
 TTree TT_lookup_tree( TTree tree, const char * prefix )
