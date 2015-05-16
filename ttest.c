@@ -4,7 +4,7 @@
  *  Created on: 11.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
-#include "ttree.h"
+#include "tstree.h"
 
 static void tt_print( TTNode node, void * data )
 {

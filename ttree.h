@@ -107,22 +107,4 @@ void TT_walk_asc( TTree tree, TT_Walk walker, void * data );
 void TT_walk_desc( TTree tree, TT_Walk wakler, void * data );
 int TT_dump( TTree tree, FILE * handle );
 
-/*
- *  Get char[] data from tree. Return pointer to allocated char ** array (sorted by
- *  key) wich must be freed with free(), or NULL. Last element of returned
- *  array is NULL.
- */
-char ** TS_data( TTree tree, size_t * count );
-char ** TS_lookup( TTree tree, const char * prefix, size_t * count );
-char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
-        size_t * count );
-/*
- *  String tree shortcuts (with NULL data field)
- */
-#define TS_create( flags ) TT_create( (flags), NULL )
-#define TS_insert( tree, key ) TT_insert( (tree), (key), NULL )
-#define TS_walk( tree, walker ) TT_walk( (tree), (walker), NULL )
-#define TS_walk_asc( tree, walker ) TT_walk_asc( (tree), (walker), NULL )
-#define TS_walk_desc( tree, walker ) TT_walk_desc( (tree), (walker), NULL )
-
 #endif /* TTREE_H_ */
