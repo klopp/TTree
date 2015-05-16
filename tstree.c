@@ -7,8 +7,7 @@
 
 #include "tstree.h"
 
-TTNode __TT_lookup( TTNode node, const char *s,
-        TT_Flags flags );
+TTNode __TT_lookup( TTNode node, const char *s, TT_Flags flags );
 void _TS_data( TTNode node, void * data );
 void _TT_walk_asc( TTNode node, TT_Walk walker, void * data );
 TT_Data _TT_lookup( TTree tree, const char * prefix, size_t max,

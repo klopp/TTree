@@ -28,5 +28,4 @@ char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
 #define TS_walk_asc( tree, walker ) TT_walk_asc( (tree), (walker), NULL )
 #define TS_walk_desc( tree, walker ) TT_walk_desc( (tree), (walker), NULL )
 
-
 #endif /* TSTREE_H_ */

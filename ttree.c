@@ -42,8 +42,7 @@ TTree TT_create( TT_Flags flags, TT_Destroy destructor )
 /*
  *  Destroy tree / delete tree node stuff:
  */
-static void _TT_destroy( TTNode node, TT_Destroy destructor,
-        int delnode )
+static void _TT_destroy( TTNode node, TT_Destroy destructor, int delnode )
 {
     if( node->left ) _TT_destroy( node->left, destructor, delnode );
     if( node->mid ) _TT_destroy( node->mid, destructor, delnode );
@@ -78,8 +77,7 @@ int TT_delete( TTree tree, const char * key )
 /*
  *  Search nodes stuff:
  */
-static TTNode _TT_search( TTNode node, const char *s,
-        TT_Flags flags )
+static TTNode _TT_search( TTNode node, const char *s, TT_Flags flags )
 {
     TTNode ptr = node;
 
@@ -111,9 +109,8 @@ TTNode TT_search( TTree tree, const char *s )
 /*
  *  Insert nodes stuff:
  */
-static TTNode _TT_insert( TTNode node, const char *s,
-        size_t pos, void * data, TT_Flags flags, TT_Destroy destructor,
-        size_t depth )
+static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void * data,
+        TT_Flags flags, TT_Destroy destructor, size_t depth )
 {
     char c = (flags & TT_NOCASE) ? tolower( s[pos] ) : s[pos];
 
@@ -337,8 +334,7 @@ char ** TS_data( TTree tree, size_t * count )
 /*
  *  Dump tree stuff:
  */
-static void _TT_dump( TTNode node, char * indent, int last,
-        FILE * handle )
+static void _TT_dump( TTNode node, char * indent, int last, FILE * handle )
 {
     int strip = 0;
     if( node->splitter )
@@ -392,8 +388,7 @@ int TT_dump( TTree tree, FILE * handle )
 /*
  *  Lookup stuff:
  */
-TTNode __TT_lookup( TTNode node, const char *s,
-        TT_Flags flags )
+TTNode __TT_lookup( TTNode node, const char *s, TT_Flags flags )
 {
     TTNode ptr = node;
 
