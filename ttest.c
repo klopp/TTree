@@ -5,7 +5,7 @@
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
 
-#if defined(__TEST__)
+#if defined(__TTREE_TEST__)
 
 #include "tstree.h"
 
@@ -110,4 +110,5 @@ int main()
     return 0;
 }
 
-#endif
+#endif  /* __TTREE_TEST__ */
+
