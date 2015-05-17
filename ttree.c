@@ -193,8 +193,9 @@ void _TT_walk_asc( TTNode node, TT_Walk walker, void * data )
 {
     if( node )
     {
-        walker( node, data );
+//        walker( node, data );
         _TT_walk_asc( node->left, walker, data );
+        walker( node, data );
         _TT_walk_asc( node->mid, walker, data );
         _TT_walk_asc( node->right, walker, data );
     }
@@ -205,8 +206,9 @@ static void _TT_walk_desc( TTNode node, TT_Walk walker, void * data )
     {
         _TT_walk_desc( node->right, walker, data );
         _TT_walk_desc( node->mid, walker, data );
-        _TT_walk_desc( node->left, walker, data );
         walker( node, data );
+        _TT_walk_desc( node->left, walker, data );
+//        walker( node, data );
     }
 }
 void TT_walk( TTree tree, TT_Walk walker, void * data )
