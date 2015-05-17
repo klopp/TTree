@@ -4,6 +4,9 @@
  *  Created on: 11.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
+
+#if defined(__TEST__)
+
 #include "tstree.h"
 
 static void tt_print( TTNode node, void * data )
@@ -106,3 +109,5 @@ int main()
 
     return 0;
 }
+
+#endif

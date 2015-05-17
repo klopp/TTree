@@ -65,7 +65,7 @@ void TT_clear( TTree tree )
 }
 int TT_delete( TTree tree, const char * key )
 {
-    struct _TTNode * node = TT_search( tree, key );
+    TTNode node = TT_search( tree, key );
     if( node )
     {
         _TT_destroy( node, tree->destructor, 0 );
