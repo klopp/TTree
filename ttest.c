@@ -42,7 +42,7 @@ int main()
 
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
-    TT_delete( tree, "is" );
+    TT_del_key( tree, "is" );
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
 

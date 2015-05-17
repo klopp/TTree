@@ -60,7 +60,6 @@ void TT_destroy( TTree tree );
  *  replaced. Return NULL if operation fails.
  */
 TTNode TT_insert( TTree tree, const char * key, void * data );
-
 /*
  *  Search tree node with specified key. Return found node pointer or NULL.
  */
@@ -79,11 +78,14 @@ TT_Data TT_nlookup( TTree tree, const char * prefix, size_t max,
  *  new tree is NULL.
  */
 TTree TT_lookup_tree( TTree tree, const char * prefix );
-
 /*
  *  Delete tree node with specified key. Return 0 if node is not found, or 1.
  */
-int TT_delete( TTree tree, const char * key );
+int TT_del_node( TTree tree, const char * key );
+/*
+ *  Delete tree key. Return 0 if key is not found, or 1.
+ */
+int TT_del_key( TTree tree, const char * key );
 
 /*
  *  Get tree information.

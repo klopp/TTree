@@ -63,7 +63,7 @@ void TT_clear( TTree tree )
     _TT_destroy( tree->head->mid, tree->destructor, 1 );
     tree->head->mid = NULL;
 }
-int TT_delete( TTree tree, const char * key )
+int TT_del_node( TTree tree, const char * key )
 {
     TTNode node = TT_search( tree, key );
     if( node )
@@ -73,6 +73,20 @@ int TT_delete( TTree tree, const char * key )
     }
     return 0;
 }
+int TT_del_key( TTree tree, const char * key )
+{
+    TTNode node = TT_search( tree, key );
+    if( node )
+    {
+        if( node->data && tree->destructor ) tree->destructor( node->data );
+        node->data = NULL;
+        free( node->key );
+        node->key = NULL;
+        return 1;
+    }
+    return 0;
+}
+
 
 /*
  *  Search nodes stuff:
