@@ -11,6 +11,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 typedef enum _TT_Flags
 {
     TT_NOCASE = 0x01,           // ignore case for keys
@@ -108,5 +113,9 @@ void TT_walk( TTree tree, TT_Walk wakler, void * data );
 void TT_walk_asc( TTree tree, TT_Walk walker, void * data );
 void TT_walk_desc( TTree tree, TT_Walk wakler, void * data );
 int TT_dump( TTree tree, FILE * handle );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TTREE_H_ */

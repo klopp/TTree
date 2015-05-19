@@ -10,6 +10,11 @@
 
 #include "ttree.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /*
  *  Get char ** data from tree. Return pointer to allocated char ** array
  *  (sorted by key) wich must be freed with free(), or NULL. Last element of
@@ -27,5 +32,9 @@ char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
 #define TS_walk( tree, walker ) TT_walk( (tree), (walker), NULL )
 #define TS_walk_asc( tree, walker ) TT_walk_asc( (tree), (walker), NULL )
 #define TS_walk_desc( tree, walker ) TT_walk_desc( (tree), (walker), NULL )
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TSTREE_H_ */
