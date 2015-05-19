@@ -8,6 +8,7 @@
 #ifndef TTREE_H_
 #define TTREE_H_
 
+#include "../klib/config.h"
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -24,6 +24,7 @@ int main()
     TTree rc;
     TTree tree = TS_create( TT_DEFAULTS );
 
+/*
     TS_insert( tree, "make" );
     TS_insert( tree, "love" );
     TS_insert( tree, "not" );
@@ -39,27 +40,39 @@ int main()
     TS_insert( tree, "need" );
     TS_insert( tree, "is" );
     TS_insert( tree, "love" );
+*/
 
+
+    TS_insert( tree, "aa" );
+    TS_insert( tree, "a" );
+
+
+/*
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
     TT_del_key( tree, "is" );
     node = TT_search( tree, "is" );
     printf( "\"is\" is %sfound\n", node ? "" : "NOT " );
+*/
 
     printf( "\nTT_dump( tree, stdout ):\n" );
     TT_dump( tree, stdout );
 
-    printf( "\nTT_walk_desc( tree, ... ):\n" );
+//    printf( "\nTT_walk_desc( tree, ... ):\n" );
+    TS_walk_asc( tree, tt_print );
     TS_walk_desc( tree, tt_print );
+//    TS_walk_desc( tree, tt_print );
 
-    printf( "\nTS_data( tree ):\n" );
+//    printf( "\nTS_data( tree ):\n" );
     /*
      *  1st way:
      */
+/*
     sdata = TS_data( tree, NULL );
     keys = TT_keys( tree );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", sdata[i] );
+*/
 
     /*
      *  2nd way:
@@ -81,12 +94,14 @@ int main()
      ptr++;
      }
      */
+/*
     free( sdata );
 
     printf( "\nTS_lookup( tree, \"w\" ):\n" );
     sdata = TS_lookup( tree, "w", &keys );
     for( i = 0; i < keys; i++ )
         printf( "%s\n", sdata[i] );
+*/
     /*
      *  OR
      */
@@ -98,12 +113,14 @@ int main()
      ptr++;
      }
      */
+/*
     free( sdata );
 
     printf( "\nTT_lookup_tree( tree, \"w\" ):\n" );
     rc = TT_lookup_tree( tree, "w" );
     TT_dump( rc, stdout );
     TT_destroy( rc );
+*/
 
     TT_destroy( tree );
 
