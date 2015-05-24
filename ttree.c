@@ -164,8 +164,8 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void * data,
                 if( node->data && tree->destructor ) tree->destructor(
                         node->data );
                 node->data = data;
-                tree->keys++;
             }
+            tree->keys++;
         }
     }
     if( c > node->splitter ) node->right = _TT_insert( node->right, s, pos,
