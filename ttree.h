@@ -51,6 +51,9 @@ typedef void (*TT_Walk)( TTNode node, void * data );
 
 typedef struct _TernaryTree
 {
+    size_t keys;
+    size_t nodes;
+    /*size_t depth;*/
     TT_Flags flags;
     TT_Destroy destructor;
     TTNode head;
@@ -100,8 +103,10 @@ int TT_del_key( TTree tree, const char * key );
 /*
  *  Get tree information.
  */
+/*
 size_t TT_keys( TTree tree );
 size_t TT_nodes( TTree tree );
+*/
 size_t TT_depth( TTree tree );
 
 /*

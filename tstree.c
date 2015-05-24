@@ -31,7 +31,7 @@ static char ** _TS_lookup( TTree tree, const char * prefix, size_t max,
     node = __TT_lookup( tree->head->mid, prefix, tree->flags );
     if( !node || !node->mid ) return NULL;
 
-    if( !max ) max = TT_keys( tree );
+    if( !max ) max = tree->keys/*TT_keys( tree )*/;
 
     data.data = calloc( sizeof(char *), max + 1 );
     if( !data.data ) return NULL;
