@@ -69,8 +69,7 @@ int main()
      */
 /*
     sdata = TS_data( tree, NULL );
-    keys = TT_keys( tree );
-    for( i = 0; i < keys; i++ )
+    for( i = 0; i < tree->keys; i++ )
         printf( "%s\n", sdata[i] );
 */
 
