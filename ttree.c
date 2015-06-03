@@ -13,7 +13,7 @@
  */
 static TTNode _TT_create_node( char c )
 {
-    TTNode node = calloc( sizeof(struct _TTNode), 1 );
+    TTNode node = Calloc( sizeof(struct _TTNode), 1 );
     if( !node ) return NULL;
     node->splitter = c;
     return node;
@@ -24,7 +24,7 @@ static TTNode _TT_create_node( char c )
  */
 TTree TT_create( TT_Flags flags, TT_Destroy destructor )
 {
-    TTree tree = calloc( sizeof(struct _TernaryTree), 1 );
+    TTree tree = Calloc( sizeof(struct _TernaryTree), 1 );
     if( tree )
     {
         tree->head = _TT_create_node( 0 );
@@ -34,7 +34,7 @@ TTree TT_create( TT_Flags flags, TT_Destroy destructor )
             tree->destructor = destructor;
             return tree;
         }
-        free( tree );
+        Free( tree );
     }
     return NULL;
 }
@@ -48,17 +48,17 @@ static void _TT_destroy( TTNode node, TTree tree, int delnode )
     if( node->mid ) _TT_destroy( node->mid, tree, delnode );
     if( node->right ) _TT_destroy( node->right, tree, delnode );
     if( node->data && tree->destructor ) tree->destructor( node->data );
-    free( node->key );
+    Free( node->key );
     tree->keys--;
     tree->nodes--;
     memset( node, 0, sizeof(struct _TTNode) );
-    if( delnode ) free( node );
+    if( delnode ) Free( node );
 }
 void TT_destroy( TTree tree )
 {
     if( tree->head ) _TT_destroy( tree->head, tree, 1 );
     memset( tree, 0, sizeof(struct _TernaryTree) );
-    free( tree );
+    Free( tree );
 }
 void TT_clear( TTree tree )
 {
@@ -82,7 +82,7 @@ int TT_del_key( TTree tree, const char * key )
     {
         if( node->data && tree->destructor ) tree->destructor( node->data );
         node->data = NULL;
-        free( node->key );
+        Free( node->key );
         tree->keys--;
         node->key = NULL;
         return 1;
@@ -157,7 +157,7 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void * data,
         }
         else
         {
-            if( !node->key ) node->key = strdup( s );
+            if( !node->key ) node->key = Strdup( s );
             if( !node->key ) return NULL;
             if( !(tree->flags & TT_INSERT_IGNORE) )
             {
@@ -310,7 +310,7 @@ TT_Data TT_data( TTree tree, size_t * count )
     keys = TT_keys( tree );
     if( !keys ) return NULL;
 */
-    data.data = calloc( sizeof(struct _TT_Data), tree->keys + 1 );
+    data.data = Calloc( sizeof(struct _TT_Data), tree->keys + 1 );
     if( !data.data ) return NULL;
     data.max = ((size_t)-1);
     TT_walk_asc( tree, _TT_data, &data );
@@ -353,7 +353,7 @@ char ** TS_data( TTree tree, size_t * count )
     keys = TT_keys( tree );
     if( !keys ) return NULL;
 */
-    data.data = calloc( sizeof(char *), tree->keys + 1 );
+    data.data = Calloc( sizeof(char *), tree->keys + 1 );
     if( !data.data ) return NULL;
     data.max = ((size_t)-1);
     TT_walk_asc( tree, _TS_data, &data );
@@ -403,14 +403,14 @@ static void _TT_dump( TTNode node, char * indent, int last, FILE * handle )
 int TT_dump( TTree tree, FILE * handle )
 {
     size_t depth = TT_depth( tree );
-    char * buf = calloc( depth + 1, 2 );
+    char * buf = Calloc( depth + 1, 2 );
     if( buf )
     {
         fprintf( handle, "nodes: %u, keys: %u, depth: %u\n",
                 tree->nodes/*TT_nodes( tree )*/, tree->keys/*TT_keys( tree )*/,
                 TT_depth( tree ) );
         _TT_dump( tree->head, buf, 0, handle );
-        free( buf );
+        Free( buf );
         return 1;
     }
     return 0;
@@ -462,7 +462,7 @@ TT_Data _TT_lookup( TTree tree, const char * prefix, size_t max,
 
     if( !max ) max = tree->keys/*TT_keys( tree )*/;
 
-    data.data = calloc( sizeof(struct _TT_Data), max + 1 );
+    data.data = Calloc( sizeof(struct _TT_Data), max + 1 );
     if( !data.data ) return NULL;
 
     data.max = max;
@@ -484,7 +484,7 @@ TTree TT_lookup_tree( TTree tree, const char * prefix )
                 1 );
         ptr++;
     }
-    free( data );
+    Free( data );
 
     return rc;
 }

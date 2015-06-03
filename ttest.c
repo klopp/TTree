@@ -24,6 +24,16 @@ int main()
     TTree rc;
     TTree tree = TS_create( TT_DEFAULTS );
 
+    struct A { size_t sz; char data[1]; } *a;
+
+    a = (struct A*)Malloc(1024);
+    a->data[0] = '0';
+    a->data[1] = '1';
+    a->data[2] = '2';
+    a->data[3] = '3';
+    a->data[4] = '4';
+    Free( a );
+
 /*
     TS_insert( tree, "make" );
     TS_insert( tree, "love" );
