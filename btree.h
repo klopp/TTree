@@ -19,11 +19,10 @@ extern "C"
 {
 #endif
 
-typedef enum _TT_Flags
+typedef enum _BT_Flags
 {
-    BT_INSERT_FAST = 0x02,      // BT_insert() does not return added node
-    BT_INSERT_IGNORE = 0x04,    // BT_insert() does not replace existing data
-    BT_DEFAULTS = (BT_INSERT_FAST)
+    BT_INSERT_IGNORE = 0x01,    // BT_insert() does not replace existing data
+    BT_DEFAULTS = (0)
 } BT_Flags;
 
 typedef struct _BTNode
@@ -38,6 +37,7 @@ typedef struct _BTNode
 
 typedef void (*BT_Destroy)( void * data );
 typedef void (*BT_Walk)( BTNode node, void * data );
+typedef void (*BT_Dump)( void * data, FILE * handle );
 
 typedef struct _BTree
 {
@@ -50,6 +50,7 @@ typedef struct _BTree
 BTree BT_create( BT_Flags flags, BT_Destroy destructor );
 void BT_clear( BTree tree );
 void BT_destroy( BTree tree );
+void BT_Free( void * data );
 
 size_t BT_depth( BTree tree );
 
@@ -58,7 +59,8 @@ int BT_delete( BTree tree, int key );
 BTNode BT_search( BTree tree, int key );
 
 void BT_walk( BTree tree, BT_Walk walker, void * data );
-int BT_dump( BTree tree, FILE * handle );
+void BT_walk_desc( BTree tree, BT_Walk walker, void * data );
+int BT_dump( BTree tree, BT_Dump dumper, FILE * handle );
 BTree BT_balance( BTree tree );
 
 #ifdef __cplusplus

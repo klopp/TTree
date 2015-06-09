@@ -7,6 +7,11 @@
 
 #include "btree.h"
 
+void BT_Free( void * data )
+{
+    Free( data );
+}
+
 static int _BN_height( BTNode node )
 {
     return node ? node->height : 0;
@@ -55,15 +60,6 @@ static BTNode _BN_balance( BTNode node )
         if( BN_bf( node->left ) > 0 ) node->left = _BN_rotl( node->left );
         return _BN_rotr( node );
     }
-    return node;
-}
-
-static BTNode * _BT_search( BTNode * node, int key )
-{
-    if( key < (*node)->key ) return
-            (*node)->left ? _BT_search( &(*node)->left, key ) : NULL;
-    if( key > (*node)->key ) return
-            (*node)->right ? _BT_search( &(*node)->right, key ) : NULL;
     return node;
 }
 
@@ -143,19 +139,32 @@ static void _BT_clear( BTree tree, BTNode * node )
 
 void BT_clear( BTree tree )
 {
-    if( tree )
-    {
-        _BT_clear( tree, &tree->head );
-    }
+    if( tree ) _BT_clear( tree, &tree->head );
 }
 
 void BT_destroy( BTree tree )
 {
-    if( tree )
+    _BT_clear( tree, &tree->head );
+    Free( tree );
+}
+
+static BTNode * _BT_search( BTNode * node, int key )
+{
+    if( key < (*node)->key ) return
+            (*node)->left ? _BT_search( &(*node)->left, key ) : NULL;
+    if( key > (*node)->key ) return
+            (*node)->right ? _BT_search( &(*node)->right, key ) : NULL;
+    return node;
+}
+
+BTNode BT_search( BTree tree, int key )
+{
+    if( tree && tree->head )
     {
-        _BT_clear( tree, &tree->head );
-        Free( tree );
+        BTNode * node = _BT_search( &tree->head, key );
+        if( node ) return *node;
     }
+    return NULL;
 }
 
 int BT_delete( BTree tree, int key )
@@ -198,23 +207,23 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void * data,
         if( n ) node->right = n;
         else return NULL;
     }
-    else if( (tree->flags & BT_INSERT_IGNORE) != BT_INSERT_IGNORE )
+    else
     {
-        if( tree->destructor && node->data ) tree->destructor( node->data );
-        node->data = data;
+        if( (tree->flags & BT_INSERT_IGNORE) != BT_INSERT_IGNORE )
+        {
+            if( tree->destructor && node->data ) tree->destructor( node->data );
+            node->data = data;
+            tree->nodes--;
+        }
+        else
+        {
+            /*
+             * TODO free data?
+             */
+            return NULL;
+        }
     }
     return _BN_balance( node );
-    //return node;
-}
-
-BTNode BT_search( BTree tree, int key )
-{
-    if( tree && tree->head )
-    {
-        BTNode * node = _BT_search( &tree->head, key );
-        if( node ) return *node;
-    }
-    return NULL;
 }
 
 BTNode BT_insert( BTree tree, int key, void * data )
@@ -225,28 +234,38 @@ BTNode BT_insert( BTree tree, int key, void * data )
     {
         tree->nodes++;
         tree->head = node;
-        /*
-         _BN_balance( node );
-         if( (tree->flags & BT_INSERT_FAST) != BT_INSERT_FAST ) _BN_balance(
-         node );
-         */
     }
     return node;
 }
 
-static void _BT_walk( BTNode node, BT_Walk walker, void * data )
+static void _BT_walk_asc( BTNode node, BT_Walk walker, void * data )
 {
     if( node )
     {
-        _BT_walk( node->left, walker, data );
-        _BT_walk( node->right, walker, data );
+        _BT_walk_asc( node->left, walker, data );
         walker( node, data );
+        _BT_walk_asc( node->right, walker, data );
+    }
+}
+
+static void _BT_walk_desc( BTNode node, BT_Walk walker, void * data )
+{
+    if( node )
+    {
+        _BT_walk_desc( node->right, walker, data );
+        walker( node, data );
+        _BT_walk_desc( node->left, walker, data );
     }
 }
 
 void BT_walk( BTree tree, BT_Walk walker, void * data )
 {
-    if( tree && tree->head ) _BT_walk( tree->head, walker, data );
+    if( tree && tree->head ) _BT_walk_asc( tree->head, walker, data );
+}
+
+void BT_walk_desc( BTree tree, BT_Walk walker, void * data )
+{
+    if( tree && tree->head ) _BT_walk_desc( tree->head, walker, data );
 }
 
 static void _BT_depth( BTNode node, void * data )
@@ -260,7 +279,8 @@ size_t BT_depth( BTree tree )
     return max;
 }
 
-static void _BT_dump( BTNode node, char * indent, int last, FILE * handle )
+static void _BT_dump( BTNode node, BT_Dump dumper, char * indent, int last,
+        FILE * handle )
 {
     int strip = strlen( indent );
     fprintf( handle, "%s", indent );
@@ -275,13 +295,16 @@ static void _BT_dump( BTNode node, char * indent, int last, FILE * handle )
         strcat( indent, "| " );
     }
 
-    fprintf( handle, "[%d]\n", node->key );
-    if( node->left ) _BT_dump( node->left, indent, !node->right, handle );
-    if( node->right ) _BT_dump( node->right, indent, 1, handle );
+    fprintf( handle, "[%d]", node->key );
+    if( dumper ) dumper( node->data, handle );
+    fprintf( handle, "\n" );
+    if( node->left ) _BT_dump( node->left, dumper, indent, !node->right,
+            handle );
+    if( node->right ) _BT_dump( node->right, dumper, indent, 1, handle );
     if( strip ) indent[strip] = 0;
 }
 
-int BT_dump( BTree tree, FILE * handle )
+int BT_dump( BTree tree, BT_Dump dumper, FILE * handle )
 {
     size_t depth = BT_depth( tree );
     char * buf = Calloc( depth + 1, 2 );
@@ -289,29 +312,10 @@ int BT_dump( BTree tree, FILE * handle )
     {
         fprintf( handle, "nodes: %u, depth: %u\n", tree->nodes,
                 BT_depth( tree ) );
-        _BT_dump( tree->head, buf, 1, handle );
+        _BT_dump( tree->head, dumper, buf, 1, handle );
         Free( buf );
         return 1;
     }
     return 0;
 }
 
-/*
- static void _BT_walk_asc( BTNode node, BT_Walk walker, void * data )
- {
- if( node )
- {
- walker( node, data );
- _BT_walk_asc( node->left, walker, data );
- _BT_walk_asc( node->right, walker, data );
- }
-
- }
-
- void BT_walk_asc( BTree tree, BT_Walk walker, void * data )
- {
- if( tree && tree->head )
- _BT_walk_asc( tree->head, walker, data );
- }
-
- */
