@@ -157,15 +157,21 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void * data,
         }
         else
         {
-            if( !node->key ) node->key = Strdup( s );
-            if( !node->key ) return NULL;
+            if( !node->key )
+            {
+                node->key = Strdup( s );
+                if( !node->key ) return NULL;
+                tree->keys++;
+            }
             if( !(tree->flags & TT_INSERT_IGNORE) )
             {
                 if( node->data && tree->destructor ) tree->destructor(
                         node->data );
                 node->data = data;
             }
-            tree->keys++;
+            /*
+             * TODO free data?
+             */
         }
     }
     if( c > node->splitter ) node->right = _TT_insert( node->right, s, pos,
@@ -237,15 +243,15 @@ void TT_walk_desc( TTree tree, TT_Walk walker, void * data )
  *   - keys number
  */
 /*
-static void _TT_keys( TTNode node, void * data )
-{
-    if( node->key ) (*(size_t*)data)++;
-}
-static void _TT_nodes( TTNode node, void * data )
-{
-    (*(size_t*)data)++;
-}
-*/
+ static void _TT_keys( TTNode node, void * data )
+ {
+ if( node->key ) (*(size_t*)data)++;
+ }
+ static void _TT_nodes( TTNode node, void * data )
+ {
+ (*(size_t*)data)++;
+ }
+ */
 static void _TT_depth( TTNode node, void * data )
 {
     if( node->depth > *(size_t*)data ) (*(size_t*)data) = node->depth;
@@ -257,19 +263,19 @@ size_t TT_depth( TTree tree )
     return max;
 }
 /*
-size_t TT_keys( TTree tree )
-{
-    size_t keys = 0;
-    if( tree ) TT_walk( tree, _TT_keys, &keys );
-    return keys;
-}
-size_t TT_nodes( TTree tree )
-{
-    size_t nodes = 0;
-    if( tree ) TT_walk( tree, _TT_nodes, &nodes );
-    return nodes;
-}
-*/
+ size_t TT_keys( TTree tree )
+ {
+ size_t keys = 0;
+ if( tree ) TT_walk( tree, _TT_keys, &keys );
+ return keys;
+ }
+ size_t TT_nodes( TTree tree )
+ {
+ size_t nodes = 0;
+ if( tree ) TT_walk( tree, _TT_nodes, &nodes );
+ return nodes;
+ }
+ */
 
 /*
  *  Get sorted data from tree:
@@ -306,10 +312,10 @@ TT_Data TT_data( TTree tree, size_t * count )
     if( count ) *count = 0;
     if( !tree ) return NULL;
 
-/*
-    keys = TT_keys( tree );
-    if( !keys ) return NULL;
-*/
+    /*
+     keys = TT_keys( tree );
+     if( !keys ) return NULL;
+     */
     data.data = Calloc( sizeof(struct _TT_Data), tree->keys + 1 );
     if( !data.data ) return NULL;
     data.max = ((size_t)-1);
@@ -349,10 +355,10 @@ char ** TS_data( TTree tree, size_t * count )
     if( count ) *count = 0;
     if( !tree ) return NULL;
 
-/*
-    keys = TT_keys( tree );
-    if( !keys ) return NULL;
-*/
+    /*
+     keys = TT_keys( tree );
+     if( !keys ) return NULL;
+     */
     data.data = Calloc( sizeof(char *), tree->keys + 1 );
     if( !data.data ) return NULL;
     data.max = ((size_t)-1);
