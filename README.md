@@ -1,4 +1,7 @@
 # TTree
-Ternary tree
 
-See ttest.c for examples.
+* AVL tree
+* Ternary tree
+* Ternary strings tree
+
+
