@@ -71,11 +71,13 @@ static BTNode _BT_balance( BTNode node )
     return node;
 }
 
-BTree BT_balance( BTree tree )
-{
-    if( tree && tree->head ) tree->head = _BT_balance( tree->head );
-    return tree;
-}
+/*
+ BTree BT_balance( BTree tree )
+ {
+ if( tree && tree->head ) tree->head = _BT_balance( tree->head );
+ return tree;
+ }
+ */
 
 BTree BT_create( BT_Flags flags, BT_Destroy destructor )
 {
@@ -191,7 +193,6 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void * data,
         node->key = key;
         node->data = data;
         node->height = 1;
-        node->depth = depth;
         return node;
     }
 
@@ -268,15 +269,18 @@ void BT_walk_desc( BTree tree, BT_Walk walker, void * data )
     if( tree && tree->head ) _BT_walk_desc( tree->head, walker, data );
 }
 
-static void _BT_depth( BTNode node, void * data )
+static size_t _BT_depth( BTNode node, size_t depth )
 {
-    if( node->depth > *(size_t*)data ) (*(size_t*)data) = node->depth;
+    size_t left, right;
+    if( !node ) return depth;
+    left = _BT_depth( node->left, depth + 1 );
+    right = _BT_depth( node->right, depth + 1 );
+    return left > right ? left : right;
 }
+
 size_t BT_depth( BTree tree )
 {
-    size_t max = 0;
-    if( tree ) BT_walk( tree, _BT_depth, &max );
-    return max;
+    return _BT_depth( tree->head, 0 );
 }
 
 static void _BT_dump( BTNode node, BT_Dump dumper, char * indent, int last,
@@ -310,8 +314,7 @@ int BT_dump( BTree tree, BT_Dump dumper, FILE * handle )
     char * buf = Calloc( depth + 1, 2 );
     if( buf )
     {
-        fprintf( handle, "nodes: %u, depth: %u\n", tree->nodes,
-                BT_depth( tree ) );
+        fprintf( handle, "nodes: %u, depth: %u\n", tree->nodes, depth );
         _BT_dump( tree->head, dumper, buf, 1, handle );
         Free( buf );
         return 1;

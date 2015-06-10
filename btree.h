@@ -29,7 +29,6 @@ typedef struct _BTNode
 {
     int key;
     int height;
-    size_t depth;
     void * data;
     struct _BTNode * right;
     struct _BTNode * left;
@@ -61,7 +60,6 @@ BTNode BT_search( BTree tree, int key );
 void BT_walk( BTree tree, BT_Walk walker, void * data );
 void BT_walk_desc( BTree tree, BT_Walk walker, void * data );
 int BT_dump( BTree tree, BT_Dump dumper, FILE * handle );
-BTree BT_balance( BTree tree );
 
 #ifdef __cplusplus
 }
