@@ -62,3 +62,13 @@ char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
 {
     return _TS_lookup( tree, prefix, max, count );
 }
+
+static void _TS_Dump( void * data, FILE * handle )
+{
+    fprintf( handle, " %s", (char *)data );
+}
+
+int TS_dump( TTree tree, FILE * handle )
+{
+    return TT_dump( tree, _TS_Dump, handle );
+}

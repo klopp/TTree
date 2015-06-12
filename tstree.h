@@ -24,6 +24,8 @@ char ** TS_data( TTree tree, size_t * count );
 char ** TS_lookup( TTree tree, const char * prefix, size_t * count );
 char ** TS_nlookup( TTree tree, const char * prefix, size_t max,
         size_t * count );
+int TS_dump( TTree tree, FILE * handle );
+
 /*
  *  String tree shortcuts (with NULL data field)
  */
