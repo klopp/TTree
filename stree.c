@@ -47,31 +47,6 @@ void ST_destroy( STree tree )
     Free( tree );
 }
 
-/*
- struct node* newNode(int key)
- {
- struct node* node = (struct node*)malloc(sizeof(struct node));
- node->key   = key;
- node->left  = node->right  = NULL;
- return (node);
- }
-
- struct node *rightRotate(struct node *x)
- {
- struct node *y = x->left;
- x->left = y->right;
- y->right = x;
- return y;
- }
-
- struct node *leftRotate(struct node *x)
- {
- struct node *y = x->right;
- x->right = y->left;
- y->left = x;
- return y;
- }
- */
 static STNode _rotr( STNode x )
 {
     STNode y = x->left;
@@ -132,6 +107,53 @@ STNode ST_insert( STree tree, int key, void * data )
     return node;
 }
 
+/*
+ static STNode _ST_search( STNode node, int key )
+ {
+ struct _STNode header;
+ STNode LeftTreeMax = &header;
+ STNode RightTreeMin = &header;
+
+ header.left = header.right = NULL;
+
+ while( 1 )
+ {
+ if( key < node->key )
+ {
+ if( !node->left ) break;
+ if( key < node->left->key )
+ {
+ node = _rotr( node );
+ if( !node->left ) break;
+ }
+ RightTreeMin->left = node;
+ RightTreeMin = RightTreeMin->left;
+ node = node->left;
+ RightTreeMin->right = NULL;
+ }
+ else if( key > node->key )
+ {
+ if( !node->right ) break;
+ if( key > node->right->key )
+ {
+ node = _rotl( node );
+ if( !node->right ) break;
+ }
+ LeftTreeMax->right = node;
+ LeftTreeMax = LeftTreeMax->right;
+ node = node->right;
+ LeftTreeMax->right = NULL;
+ }
+ else break;
+ }
+ LeftTreeMax->right = node->left;
+ RightTreeMin->left = node->right;
+ node->left = header.right;
+ node->right = header.left;
+ return node;
+ }
+ */
+
 static STNode * _ST_search( STNode * node, int key )
 {
     STNode * workhorse;
@@ -187,7 +209,7 @@ STNode ST_search( STree tree, int key )
     if( tree && tree->head )
     {
         STNode * node = _ST_search( &tree->head, key );
-        if( node ) return *node;
+        if( node && *node && (*node)->key == key ) return *node;
     }
     return NULL;
 }
@@ -207,47 +229,47 @@ size_t ST_depth( STree tree )
 }
 
 /*
-static size_t _ST_nodes( STNode node, size_t nodes )
-{
-    size_t left, right;
-    if( !node ) return nodes;
-    left = _ST_depth( node->left, 1 );
-    right = _ST_depth( node->right, 1 );
-    return left + right;
-}
+ static size_t _ST_nodes( STNode node, size_t nodes )
+ {
+ size_t left, right;
+ if( !node ) return nodes;
+ left = _ST_depth( node->left, 1 );
+ right = _ST_depth( node->right, 1 );
+ return left + right;
+ }
 
-static int _ST_max( STNode node, int max )
-{
-    if( node )
-    {
-        int lmax, rmax;
-        if( node->key > max ) max = node->key;
-        lmax = _ST_max( node->left, max );
-        rmax = _ST_max( node->right, max );
-        max = rmax > lmax ? rmax : lmax;
-    }
-    return max;
-}
+ static int _ST_max( STNode node, int max )
+ {
+ if( node )
+ {
+ int lmax, rmax;
+ if( node->key > max ) max = node->key;
+ lmax = _ST_max( node->left, max );
+ rmax = _ST_max( node->right, max );
+ max = rmax > lmax ? rmax : lmax;
+ }
+ return max;
+ }
 
-static int _ST_min( STNode node, int min )
-{
-    if( node )
-    {
-        int lmin, rmin;
-        if( node->key < min ) min = node->key;
-        lmin = _ST_min( node->left, min );
-        rmin = _ST_min( node->right, min );
-        min = lmin < rmin ? lmin : rmin;
-    }
-    return min;
-}
-*/
+ static int _ST_min( STNode node, int min )
+ {
+ if( node )
+ {
+ int lmin, rmin;
+ if( node->key < min ) min = node->key;
+ lmin = _ST_min( node->left, min );
+ rmin = _ST_min( node->right, min );
+ min = lmin < rmin ? lmin : rmin;
+ }
+ return min;
+ }
+ */
 
 int ST_delete( STree tree, int key )
 {
     if( tree && tree->head )
     {
-        STNode * node = _ST_search( &tree->head, key );
+        STNode *node = _ST_search( &tree->head, key );
         if( node )
         {
             STNode tmp = tree->head;
