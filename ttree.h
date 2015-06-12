@@ -49,6 +49,7 @@ typedef struct _TTNode
 
 typedef void (*TT_Destroy)( void * data );
 typedef void (*TT_Walk)( TTNode node, void * data );
+typedef void (*TT_Dump)( void * data, FILE * handle );
 
 typedef struct _TernaryTree
 {
@@ -123,7 +124,7 @@ TT_Data TT_data( TTree tree, size_t * count );
 void TT_walk( TTree tree, TT_Walk wakler, void * data );
 void TT_walk_asc( TTree tree, TT_Walk walker, void * data );
 void TT_walk_desc( TTree tree, TT_Walk wakler, void * data );
-int TT_dump( TTree tree, FILE * handle );
+int TT_dump( TTree tree, TT_Dump dumper, FILE * handle );
 
 #ifdef __cplusplus
 }

@@ -370,7 +370,7 @@ char ** TS_data( TTree tree, size_t * count )
 /*
  *  Dump tree stuff:
  */
-static void _TT_dump( TTNode node, char * indent, int last, FILE * handle )
+static void _TT_dump( TTNode node, TT_Dump dumper, char * indent, int last, FILE * handle )
 {
     int strip = 0;
     if( node->splitter )
@@ -390,23 +390,25 @@ static void _TT_dump( TTNode node, char * indent, int last, FILE * handle )
 
         if( node->key )
         {
-            fprintf( handle, "%c => [%s]\n",
+            fprintf( handle, "%c => [%s]",
                     (isprint(node->splitter) ? node->splitter : '?'),
                     node->key );
         }
         else
         {
-            fprintf( handle, "%c => ()\n",
+            fprintf( handle, "%c => ()",
                     (isprint(node->splitter) ? node->splitter : '?') );
         }
+        if( dumper ) dumper( node->data, handle );
+        fprintf( handle, "\n" );
     }
-    if( node->left ) _TT_dump( node->left, indent,
+    if( node->left ) _TT_dump( node->left, dumper, indent,
             (node->right || node->mid) ? 0 : 1, handle );
-    if( node->mid ) _TT_dump( node->mid, indent, node->right ? 0 : 1, handle );
-    if( node->right ) _TT_dump( node->right, indent, 1, handle );
+    if( node->mid ) _TT_dump( node->mid, dumper, indent, node->right ? 0 : 1, handle );
+    if( node->right ) _TT_dump( node->right, dumper, indent, 1, handle );
     if( strip ) indent[strip] = 0;
 }
-int TT_dump( TTree tree, FILE * handle )
+int TT_dump( TTree tree, TT_Dump dumper, FILE * handle )
 {
     size_t depth = TT_depth( tree );
     char * buf = Calloc( depth + 1, 2 );
@@ -415,7 +417,7 @@ int TT_dump( TTree tree, FILE * handle )
         fprintf( handle, "nodes: %u, keys: %u, depth: %u\n",
                 tree->nodes/*TT_nodes( tree )*/, tree->keys/*TT_keys( tree )*/,
                 TT_depth( tree ) );
-        _TT_dump( tree->head, buf, 0, handle );
+        _TT_dump( tree->head, dumper, buf, 0, handle );
         Free( buf );
         return 1;
     }
