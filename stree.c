@@ -270,7 +270,7 @@ int ST_delete( STree tree, int key )
     if( tree && tree->head )
     {
         STNode *node = _ST_search( &tree->head, key );
-        if( node )
+        if( node && *node && (*node)->key == key )
         {
             STNode tmp = tree->head;
             if( !tree->head->left )
@@ -279,7 +279,6 @@ int ST_delete( STree tree, int key )
             }
             else
             {
-
                 node = _ST_search( &tree->head->left, key );
                 tree->head = *node;
                 tree->head->right = tmp->right;
