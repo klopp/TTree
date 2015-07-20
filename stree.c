@@ -8,16 +8,18 @@
 #include "stree.h"
 #include <limits.h>
 
-void ST_Free( void * data )
-{
-    Free( data );
-}
-
-STree ST_create( ST_Flags flags, ST_Destroy destructor )
+STree ST_create( Tree_Flags flags, Tree_Destroy destructor )
 {
     STree tree = Calloc( sizeof(struct _STree), 1 );
     if( !tree ) return NULL;
-    tree->destructor = destructor;
+    if( destructor )
+    {
+        tree->destructor = destructor;
+    }
+    else if( flags & T_FREE_DEFAULT )
+    {
+        tree->destructor = T_Free;
+    }
     tree->flags = flags;
     return tree;
 }
@@ -85,7 +87,7 @@ static STNode _ST_insert( STree tree, STNode * node, int key, void * data,
         return _ST_insert( tree, &(*node)->right, key, data, depth + 1 );
     }
 
-    if( (tree->flags & ST_INSERT_IGNORE) != ST_INSERT_IGNORE )
+    if( tree->flags & T_INSERT_REPLACE )
     {
         if( tree->destructor && (*node)->data ) tree->destructor(
                 (*node)->data );
@@ -296,9 +298,9 @@ static void _ST_walk( STNode node, ST_Walk walker, void * data )
 {
     if( node )
     {
-        _ST_walk( node->left, walker, data );
+        _ST_walk( ((STNode)node)->left, walker, data );
         walker( node, data );
-        _ST_walk( node->right, walker, data );
+        _ST_walk( ((STNode)node)->right, walker, data );
     }
 }
 
@@ -307,21 +309,10 @@ void ST_walk( STree tree, ST_Walk walker, void * data )
     if( tree && tree->head ) _ST_walk( tree->head, walker, data );
 }
 
-static void _ST_dump( STNode node, ST_Dump dumper, char * indent, int last,
+static void _ST_dump( STNode node, Tree_Dump dumper, char * indent, int last,
         FILE * handle )
 {
-    int strip = strlen( indent );
-    fprintf( handle, "%s", indent );
-    if( last )
-    {
-        fprintf( handle, "+-" );
-        strcat( indent, "  " );
-    }
-    else
-    {
-        fprintf( handle, "|-" );
-        strcat( indent, "| " );
-    }
+    size_t strip = T_Indent( indent, last, handle );
 
     fprintf( handle, "[%d]", node->key );
     if( dumper ) dumper( node->data, handle );
@@ -332,7 +323,7 @@ static void _ST_dump( STNode node, ST_Dump dumper, char * indent, int last,
     if( strip ) indent[strip] = 0;
 }
 
-int ST_dump( STree tree, ST_Dump dumper, FILE * handle )
+int ST_dump( STree tree, Tree_Dump dumper, FILE * handle )
 {
     if( tree && tree->head )
     {
@@ -340,7 +331,7 @@ int ST_dump( STree tree, ST_Dump dumper, FILE * handle )
         char * buf = Calloc( depth + 1, 2 );
         if( buf )
         {
-            fprintf( handle, "nodes: %u, depth: %u\n", tree->nodes, depth );
+            fprintf( handle, "nodes: %zu, depth: %zu\n", tree->nodes, depth );
             _ST_dump( tree->head, dumper, buf, 1, handle );
             Free( buf );
             return 1;

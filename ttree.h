@@ -8,27 +8,12 @@
 #ifndef TTREE_H_
 #define TTREE_H_
 
-/*
- * OS and compiler dependent stuff here. Make own if needed.
- */
-#include "../klib/config.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include "tree.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-typedef enum _TT_Flags
-{
-    TT_NOCASE = 0x01,           // ignore case for keys
-    TT_INSERT_FAST = 0x02,      // TT_insert() does not return added node
-    TT_INSERT_IGNORE = 0x04,    // TT_insert() does not replace existing data
-    TT_DEFAULTS = (TT_INSERT_FAST)
-} TT_Flags;
 
 typedef struct _TT_Data
 {
@@ -47,24 +32,22 @@ typedef struct _TTNode
     struct _TTNode * right;
 }*TTNode;
 
-typedef void (*TT_Destroy)( void * data );
 typedef void (*TT_Walk)( TTNode node, void * data );
-typedef void (*TT_Dump)( void * data, FILE * handle );
 
 typedef struct _TernaryTree
 {
+    Tree_Flags flags;
+    Tree_Destroy destructor;
     size_t keys;
     size_t nodes;
-    /*size_t depth;*/
-    TT_Flags flags;
-    TT_Destroy destructor;
+    size_t depth;
     TTNode head;
 }*TTree;
 
 /*
  *  Create and destroy tree:
  */
-TTree TT_create( TT_Flags flags, TT_Destroy destructor );
+TTree TT_create( Tree_Flags flags, Tree_Destroy destructor );
 void TT_clear( TTree tree );
 void TT_destroy( TTree tree );
 
@@ -105,10 +88,6 @@ int TT_del_key( TTree tree, const char * key );
 /*
  *  Get tree information.
  */
-/*
-size_t TT_keys( TTree tree );
-size_t TT_nodes( TTree tree );
-*/
 size_t TT_depth( TTree tree );
 
 /*
@@ -124,7 +103,7 @@ TT_Data TT_data( TTree tree, size_t * count );
 void TT_walk( TTree tree, TT_Walk wakler, void * data );
 void TT_walk_asc( TTree tree, TT_Walk walker, void * data );
 void TT_walk_desc( TTree tree, TT_Walk wakler, void * data );
-int TT_dump( TTree tree, TT_Dump dumper, FILE * handle );
+int TT_dump( TTree tree, Tree_Dump dumper, FILE * handle );
 
 #ifdef __cplusplus
 }

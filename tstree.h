@@ -29,7 +29,7 @@ int TS_dump( TTree tree, FILE * handle );
 /*
  *  String tree shortcuts (with NULL data field)
  */
-#define TS_create( flags ) TT_create( (flags), NULL )
+#define TS_create( flags ) TT_create( (flags), T_Free )
 #define TS_insert( tree, key ) TT_insert( (tree), (key), NULL )
 #define TS_walk( tree, walker ) TT_walk( (tree), (walker), NULL )
 #define TS_walk_asc( tree, walker ) TT_walk_asc( (tree), (walker), NULL )

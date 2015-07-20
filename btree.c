@@ -7,11 +7,6 @@
 
 #include "btree.h"
 
-void BT_Free( void * data )
-{
-    Free( data );
-}
-
 static int _BN_height( BTNode node )
 {
     return node ? node->height : 0;
@@ -79,11 +74,18 @@ static BTNode _BT_balance( BTNode node )
  }
  */
 
-BTree BT_create( BT_Flags flags, BT_Destroy destructor )
+BTree BT_create( Tree_Flags flags, Tree_Destroy destructor )
 {
     BTree tree = Calloc( sizeof(struct _BTree), 1 );
     if( !tree ) return NULL;
+    if( destructor )
+    {
     tree->destructor = destructor;
+    }
+    else if( flags & T_FREE_DEFAULT )
+    {
+        tree->destructor = T_Free;
+    }
     tree->flags = flags;
     return tree;
 }
@@ -210,7 +212,7 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void * data,
     }
     else
     {
-        if( (tree->flags & BT_INSERT_IGNORE) != BT_INSERT_IGNORE )
+        if( tree->flags & T_INSERT_REPLACE )
         {
             if( tree->destructor && node->data ) tree->destructor( node->data );
             node->data = data;
@@ -239,23 +241,23 @@ BTNode BT_insert( BTree tree, int key, void * data )
     return node;
 }
 
-static void _BT_walk_asc( BTNode node, BT_Walk walker, void * data )
+static void _BT_walk_asc( void * node, BT_Walk walker, void * data )
 {
     if( node )
     {
-        _BT_walk_asc( node->left, walker, data );
+        _BT_walk_asc( ((BTNode)node)->left, walker, data );
         walker( node, data );
-        _BT_walk_asc( node->right, walker, data );
+        _BT_walk_asc( ((BTNode)node)->right, walker, data );
     }
 }
 
-static void _BT_walk_desc( BTNode node, BT_Walk walker, void * data )
+static void _BT_walk_desc( void * node, BT_Walk walker, void * data )
 {
     if( node )
     {
-        _BT_walk_desc( node->right, walker, data );
+        _BT_walk_desc( ((BTNode)node)->right, walker, data );
         walker( node, data );
-        _BT_walk_desc( node->left, walker, data );
+        _BT_walk_desc( ((BTNode)node)->left, walker, data );
     }
 }
 
@@ -267,6 +269,20 @@ void BT_walk( BTree tree, BT_Walk walker, void * data )
 void BT_walk_desc( BTree tree, BT_Walk walker, void * data )
 {
     if( tree && tree->head ) _BT_walk_desc( tree->head, walker, data );
+}
+
+static void _BT_dump( BTNode node, Tree_Dump dumper, char * indent, int last,
+        FILE * handle )
+{
+    size_t strip = T_Indent( indent, last, handle );
+
+    fprintf( handle, "[%d]", node->key );
+    if( dumper ) dumper( node->data, handle );
+    fprintf( handle, "\n" );
+    if( node->left ) _BT_dump( node->left, dumper, indent, !node->right,
+            handle );
+    if( node->right ) _BT_dump( node->right, dumper, indent, 1, handle );
+    if( strip ) indent[strip] = 0;
 }
 
 static size_t _BT_depth( BTNode node, size_t depth )
@@ -283,38 +299,13 @@ size_t BT_depth( BTree tree )
     return _BT_depth( tree->head, 0 );
 }
 
-static void _BT_dump( BTNode node, BT_Dump dumper, char * indent, int last,
-        FILE * handle )
-{
-    int strip = strlen( indent );
-    fprintf( handle, "%s", indent );
-    if( last )
-    {
-        fprintf( handle, "+-" );
-        strcat( indent, "  " );
-    }
-    else
-    {
-        fprintf( handle, "|-" );
-        strcat( indent, "| " );
-    }
-
-    fprintf( handle, "[%d]", node->key );
-    if( dumper ) dumper( node->data, handle );
-    fprintf( handle, "\n" );
-    if( node->left ) _BT_dump( node->left, dumper, indent, !node->right,
-            handle );
-    if( node->right ) _BT_dump( node->right, dumper, indent, 1, handle );
-    if( strip ) indent[strip] = 0;
-}
-
-int BT_dump( BTree tree, BT_Dump dumper, FILE * handle )
+int BT_dump( BTree tree, Tree_Dump dumper, FILE * handle )
 {
     size_t depth = BT_depth( tree );
     char * buf = Calloc( depth + 1, 2 );
     if( buf )
     {
-        fprintf( handle, "nodes: %u, depth: %u\n", tree->nodes, depth );
+        fprintf( handle, "nodes: %zu, depth: %zu\n", tree->nodes, depth );
         _BT_dump( tree->head, dumper, buf, 1, handle );
         Free( buf );
         return 1;
