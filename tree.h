@@ -26,6 +26,7 @@ extern "C"
 {
 #endif
 
+/*
 typedef struct _TNode
 {
     union var key;
@@ -33,6 +34,7 @@ typedef struct _TNode
     void * right;
     void * left;
 }*TNode;
+*/
 
 typedef enum _Tree_Flags
 {
