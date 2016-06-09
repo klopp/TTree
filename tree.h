@@ -44,21 +44,22 @@ typedef enum _Tree_Flags
     T_NOCASE = 1024,
     T_INSERT_FAST = 2096,
     T_DEFAULT_FLAGS = (T_INSERT_REPLACE | T_DESTROY_ON_FAIL | T_FREE_DEFAULT)
-} Tree_Flags;
+}
+Tree_Flags;
 
 /*
  * Destroy tree data:
  */
-typedef void (*Tree_Destroy)( void * data );
+typedef void (*Tree_Destroy)(void *data);
 /*
  * Dump tree node data, used by dumpers:
  */
-typedef void (*Tree_Dump)( void * data, FILE * handle );
+typedef void (*Tree_Dump)(void *data, FILE *handle);
 /*
  * Internal : indent tree node, used by dumpers.
  * Return initial indent  length.
  */
-size_t T_Indent( char * indent, int last, FILE * handle );
+size_t T_Indent(char *indent, int last, FILE *handle);
 
 /*
  * Used by walkers:
@@ -67,7 +68,7 @@ size_t T_Indent( char * indent, int last, FILE * handle );
 /*
  * Default free function (used with T_FREE_DEFAULT flag)
  */
-void T_Free( void * data );
+void T_Free(void *data);
 
 #ifdef __cplusplus
 }

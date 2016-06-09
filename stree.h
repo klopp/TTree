@@ -15,36 +15,34 @@ extern "C"
 {
 #endif
 
-typedef struct _STNode
-{
+typedef struct _STNode {
     int key;
-    void * data;
-    struct _STNode * left;
-    struct _STNode * right;
-}*STNode;
+    void *data;
+    struct _STNode *left;
+    struct _STNode *right;
+} *STNode;
 
-typedef void (*ST_Walk)( STNode node, void * data );
+typedef void (*ST_Walk)(STNode node, void *data);
 
-typedef struct _STree
-{
+typedef struct _STree {
     Tree_Flags flags;
     Tree_Destroy destructor;
     size_t nodes;
     STNode head;
-}*STree;
+} *STree;
 
-STree ST_create( Tree_Flags flags, Tree_Destroy destructor );
-void ST_clear( STree tree );
-void ST_destroy( STree tree );
+STree ST_create(Tree_Flags flags, Tree_Destroy destructor);
+void ST_clear(STree tree);
+void ST_destroy(STree tree);
 
-size_t ST_depth( STree tree );
+size_t ST_depth(STree tree);
 
-STNode ST_insert( STree tree, int key, void * data );
-int ST_delete( STree tree, int key );
-STNode ST_search( STree tree, int key );
+STNode ST_insert(STree tree, int key, void *data);
+int ST_delete(STree tree, int key);
+STNode ST_search(STree tree, int key);
 
-void ST_walk( STree tree, ST_Walk walker, void * data );
-int ST_dump( STree tree, Tree_Dump dumper, FILE * handle );
+void ST_walk(STree tree, ST_Walk walker, void *data);
+int ST_dump(STree tree, Tree_Dump dumper, FILE *handle);
 
 #ifdef __cplusplus
 }
