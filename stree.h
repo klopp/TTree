@@ -42,7 +42,7 @@ int ST_delete(STree tree, TREE_KEY_TYPE key);
 STNode ST_search(STree tree, TREE_KEY_TYPE key);
 
 void ST_walk(STree tree, ST_Walk walker, void *data);
-int ST_dump(STree tree, Tree_DataDump dumper, FILE *handle);
+int ST_dump(STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper, FILE *handle);
 
 #ifdef __cplusplus
 }

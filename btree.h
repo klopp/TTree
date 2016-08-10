@@ -45,7 +45,7 @@ BTNode BT_search(BTree tree, TREE_KEY_TYPE key);
 
 void BT_walk(BTree tree, BT_Walk walker, void *data);
 void BT_walk_desc(BTree tree, BT_Walk walker, void *data);
-int BT_dump(BTree tree, Tree_DataDump dumper, FILE *handle);
+int BT_dump(BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper, FILE *handle);
 
 #ifdef __cplusplus
 }
