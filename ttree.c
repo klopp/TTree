@@ -416,7 +416,7 @@ char **TS_data( TTree tree, size_t *count )
 /*
  *  Dump tree stuff:
  */
-static void _TT_dump( TTNode node, Tree_Dump dumper, char *indent, int last,
+static void _TT_dump( TTNode node, Tree_DataDump dumper, char *indent, int last,
                       FILE *handle )
 {
     size_t strip = 0;
@@ -455,7 +455,7 @@ static void _TT_dump( TTNode node, Tree_Dump dumper, char *indent, int last,
         indent[strip] = 0;
     }
 }
-int TT_dump( TTree tree, Tree_Dump dumper, FILE *handle )
+int TT_dump( TTree tree, Tree_DataDump dumper, FILE *handle )
 {
     size_t depth = TT_depth( tree );
     char *buf = Calloc( depth + 1, 2 );

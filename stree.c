@@ -290,7 +290,7 @@ void ST_walk(STree tree, ST_Walk walker, void *data) {
     }
 }
 
-static void _ST_dump(STNode node, Tree_Dump dumper, char *indent, int last,
+static void _ST_dump(STNode node, Tree_DataDump dumper, char *indent, int last,
                      FILE *handle) {
     size_t strip = T_Indent(indent, last, handle);
     fprintf(handle, "[%d]", node->key);
@@ -308,7 +308,7 @@ static void _ST_dump(STNode node, Tree_Dump dumper, char *indent, int last,
     }
 }
 
-int ST_dump(STree tree, Tree_Dump dumper, FILE *handle) {
+int ST_dump(STree tree, Tree_DataDump dumper, FILE *handle) {
     if(tree && tree->head) {
         size_t depth = ST_depth(tree);
         char *buf = Calloc(depth + 1, 2);

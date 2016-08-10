@@ -54,7 +54,7 @@ typedef void (*Tree_Destroy)(void *data);
 /*
  * Dump tree node data, used by dumpers:
  */
-typedef void (*Tree_Dump)(void *data, FILE *handle);
+typedef void (*Tree_DataDump)(void *data, FILE *handle);
 /*
  * Internal : indent tree node, used by dumpers.
  * Return initial indent  length.

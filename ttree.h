@@ -100,7 +100,7 @@ TT_Data TT_data(TTree tree, size_t *count);
 void TT_walk(TTree tree, TT_Walk wakler, void *data);
 void TT_walk_asc(TTree tree, TT_Walk walker, void *data);
 void TT_walk_desc(TTree tree, TT_Walk wakler, void *data);
-int TT_dump(TTree tree, Tree_Dump dumper, FILE *handle);
+int TT_dump(TTree tree, Tree_DataDump dumper, FILE *handle);
 
 #ifdef __cplusplus
 }
