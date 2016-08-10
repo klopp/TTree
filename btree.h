@@ -39,7 +39,7 @@ typedef struct _BTree {
 BTree BT_create( Tree_Flags flags, Tree_Destroy destructor );
 void BT_clear( BTree tree );
 void BT_destroy( BTree tree );
-void BT_Free( void *data );
+//void BT_Free( void *data );
 
 size_t BT_depth( BTree tree );
 
