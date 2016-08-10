@@ -59,7 +59,7 @@ static STNode _rotl(STNode x) {
     return y;
 }
 
-static STNode _ST_insert(STree tree, STNode *node, int key, void *data,
+static STNode _ST_insert(STree tree, STNode *node, TREE_KEY_TYPE key, void *data,
                          size_t depth) {
     if(!*node) {
         STNode n = Calloc(sizeof(struct _STNode), 1);
@@ -89,7 +89,7 @@ static STNode _ST_insert(STree tree, STNode *node, int key, void *data,
     return NULL;
 }
 
-STNode ST_insert(STree tree, int key, void *data) {
+STNode ST_insert(STree tree, TREE_KEY_TYPE key, void *data) {
     if(!tree) {
         return NULL;
     }
@@ -147,7 +147,7 @@ STNode ST_insert(STree tree, int key, void *data) {
  }
  */
 
-static STNode *_ST_search(STNode *node, int key) {
+static STNode *_ST_search(STNode *node, TREE_KEY_TYPE key) {
     STNode *workhorse;
     if(!*node || (*node)->key == key) {
         return node;
@@ -192,7 +192,7 @@ static STNode *_ST_search(STNode *node, int key) {
     return node;
 }
 
-STNode ST_search(STree tree, int key) {
+STNode ST_search(STree tree, TREE_KEY_TYPE key) {
     if(tree && tree->head) {
         STNode *node = _ST_search(&tree->head, key);
         if(node && *node && (*node)->key == key) {
@@ -253,7 +253,7 @@ size_t ST_depth(STree tree) {
  }
  */
 
-int ST_delete(STree tree, int key) {
+int ST_delete(STree tree, TREE_KEY_TYPE key) {
     if(tree && tree->head) {
         STNode *node = _ST_search(&tree->head, key);
         if(node && *node && (*node)->key == key) {
@@ -293,7 +293,7 @@ void ST_walk(STree tree, ST_Walk walker, void *data) {
 static void _ST_dump(STNode node, Tree_DataDump dumper, char *indent, int last,
                      FILE *handle) {
     size_t strip = T_Indent(indent, last, handle);
-    fprintf(handle, "[%d]", node->key);
+    fprintf(handle, "[%llX]", (long long)node->key);
     if(dumper) {
         dumper(node->data, handle);
     }

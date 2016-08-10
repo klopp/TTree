@@ -16,7 +16,7 @@ extern "C"
 #endif
 
 typedef struct _BTNode {
-    int key;
+    TREE_KEY_TYPE key;
     int height;
     void *data;
     struct _BTNode *right;
@@ -39,13 +39,13 @@ void BT_Free(void *data);
 
 size_t BT_depth(BTree tree);
 
-BTNode BT_insert(BTree tree, int key, void *data);
-int BT_delete(BTree tree, int key);
-BTNode BT_search(BTree tree, int key);
+BTNode BT_insert(BTree tree, TREE_KEY_TYPE key, void *data);
+int BT_delete(BTree tree, TREE_KEY_TYPE key);
+BTNode BT_search(BTree tree, TREE_KEY_TYPE key);
 
 void BT_walk(BTree tree, BT_Walk walker, void *data);
 void BT_walk_desc(BTree tree, BT_Walk walker, void *data);
-int BT_dump(BTree tree, Tree_Dump dumper, FILE *handle);
+int BT_dump(BTree tree, Tree_DataDump dumper, FILE *handle);
 
 #ifdef __cplusplus
 }

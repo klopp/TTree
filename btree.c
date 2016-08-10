@@ -154,7 +154,7 @@ static BTNode *_BT_search(BTNode *node, int key) {
     return node;
 }
 
-BTNode BT_search(BTree tree, int key) {
+BTNode BT_search(BTree tree, TREE_KEY_TYPE key) {
     if(tree && tree->head) {
         BTNode *node = _BT_search(&tree->head, key);
         if(node) {
@@ -164,7 +164,7 @@ BTNode BT_search(BTree tree, int key) {
     return NULL;
 }
 
-int BT_delete(BTree tree, int key) {
+int BT_delete(BTree tree, TREE_KEY_TYPE key) {
     if(tree && tree->head) {
         BTNode *node = _BT_search(&tree->head, key);
         if(node) {
@@ -218,7 +218,7 @@ static BTNode _BT_insert(BTree tree, BTNode node, int key, void *data,
     return _BN_balance(node);
 }
 
-BTNode BT_insert(BTree tree, int key, void *data) {
+BTNode BT_insert(BTree tree, TREE_KEY_TYPE key, void *data) {
     if(!tree) {
         return NULL;
     }
@@ -258,10 +258,10 @@ void BT_walk_desc(BTree tree, BT_Walk walker, void *data) {
     }
 }
 
-static void _BT_dump(BTNode node, Tree_Dump dumper, char *indent, int last,
+static void _BT_dump(BTNode node, Tree_DataDump dumper, char *indent, int last,
                      FILE *handle) {
     size_t strip = T_Indent(indent, last, handle);
-    fprintf(handle, "[%d]", node->key);
+    fprintf(handle, "[%llX]", (long long)node->key);
     if(dumper) {
         dumper(node->data, handle);
     }
@@ -290,7 +290,7 @@ size_t BT_depth(BTree tree) {
     return _BT_depth(tree->head, 0);
 }
 
-int BT_dump(BTree tree, Tree_Dump dumper, FILE *handle) {
+int BT_dump(BTree tree, Tree_DataDump dumper, FILE *handle) {
     size_t depth = BT_depth(tree);
     char *buf = Calloc(depth + 1, 2);
     if(buf) {

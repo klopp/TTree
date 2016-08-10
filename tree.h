@@ -36,6 +36,10 @@ typedef struct _TNode
 }*TNode;
 */
 
+#ifndef TREE_KEY_TYPE
+# define TREE_KEY_TYPE unsigned long long
+#endif
+
 typedef enum _Tree_Flags
 {
     T_INSERT_REPLACE = 1,
