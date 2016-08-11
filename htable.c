@@ -1,6 +1,6 @@
 /*
  *  Created on: 11 авг. 2016 г.
- *      Author: klopp
+ *      Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
 
 #include "htable.h"
@@ -11,7 +11,10 @@ HTable HT_create( Tree_Flags flags, Tree_Destroy destructor )
     HTable ht = Malloc( sizeof( struct _HTable ) );
 
     if( ht ) {
-        ht->bt = BT_create( flags, destructor );
+        /*
+         * Always replace values:
+         */
+        ht->bt = BT_create( flags | T_INSERT_REPLACE, destructor );
 
         if( !ht->bt ) {
             Free( ht );
@@ -47,7 +50,7 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
     crc = crc32( key, key_size );
     btn = BT_insert( ht->bt, crc, data );
     __unlock( ht->lock );
-    return btn ?  crc : 0;
+    return btn ? crc : 0;
 }
 
 void *HT_get( HTable ht, const void *key, size_t key_size )
@@ -93,7 +96,7 @@ int HT_delete_c( HTable ht, const char *key )
     return HT_delete( ht, key, strlen( key ) );
 }
 
-#define HT_INTEGER_IMPL(tag,type) \
+#define HT_INTEGER_IMPL(tag, type) \
     unsigned int HT_set_##tag( HTable ht, type key, void *data ) { \
         return HT_set( ht, &key, sizeof(key), data ); \
     } \

@@ -1,6 +1,6 @@
 /*
  *  Created on: 11 авг. 2016 г.
- *      Author: klopp
+ *      Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
 
 #ifndef HTABLE_H_
@@ -34,7 +34,7 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data );
 void *HT_get( HTable ht, const void *key, size_t key_size );
 int HT_delete( HTable ht, const void *key, size_t key_size );
 /*
- * HT_get_k() and HT_delete_k() uses internal key value (see HT_set() return, faster):
+ * HT_get_k() and HT_delete_k() uses internal key values (see HT_set() return, faster):
  */
 void *HT_get_k( HTable ht, unsigned int key );
 int HT_delete_k( HTable ht, unsigned int key );
@@ -52,7 +52,7 @@ int HT_delete_c( HTable ht, const char *key );
  * HT_set_ulong( ht, 1234, data );
  * ... etc
  */
-#define HT_INTEGER(tag,type) \
+#define HT_INTEGER(tag, type) \
         unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
         void *HT_get_##tag( HTable ht, type key); \
         int HT_delete_##tag( HTable ht, type key);
