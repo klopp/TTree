@@ -33,6 +33,7 @@ typedef struct _STree {
     Tree_Destroy destructor;
     size_t nodes;
     STNode head;
+    __lock_t( lock );
 } *STree;
 
 STree ST_create( Tree_Flags flags, Tree_Destroy destructor );

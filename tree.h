@@ -12,6 +12,7 @@
  * OS and compiler dependent stuff here. Make own if needed.
  */
 #include "../klib/config.h"
+#include "../klib/_lock.h"
 
 #include <stdlib.h>
 #include <string.h>

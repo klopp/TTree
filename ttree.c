@@ -43,6 +43,7 @@ TTree TT_create( Tree_Flags flags, Tree_Destroy destructor )
                 tree->destructor = T_Free;
             }
 
+            __initlock( tree->lock );
             return tree;
         }
 
@@ -85,7 +86,9 @@ static void _TT_destroy( TTNode node, TTree tree, int delnode )
 void TT_destroy( TTree tree )
 {
     if( tree->head ) {
+        __lock( tree->lock );
         _TT_destroy( tree->head, tree, 1 );
+        __unlock( tree->lock );
     }
 
     memset( tree, 0, sizeof( struct _TernaryTree ) );
@@ -93,15 +96,19 @@ void TT_destroy( TTree tree )
 }
 void TT_clear( TTree tree )
 {
+    __lock( tree->lock );
     _TT_destroy( tree->head->mid, tree, 1 );
     tree->head->mid = NULL;
+    __unlock( tree->lock );
 }
 int TT_del_node( TTree tree, const char *key )
 {
     TTNode node = TT_search( tree, key );
 
     if( node ) {
+        __lock( tree->lock );
         _TT_destroy( node, tree, 0 );
+        __unlock( tree->lock );
         return 1;
     }
 
@@ -112,6 +119,8 @@ int TT_del_key( TTree tree, const char *key )
     TTNode node = TT_search( tree, key );
 
     if( node ) {
+        __lock( tree->lock );
+
         if( node->data && tree->destructor ) {
             tree->destructor( node->data );
         }
@@ -120,6 +129,7 @@ int TT_del_key( TTree tree, const char *key )
         Free( node->key );
         tree->keys--;
         node->key = NULL;
+        __unlock( tree->lock );
         return 1;
     }
 
@@ -156,11 +166,16 @@ static TTNode _TT_search( TTNode node, const char *s, Tree_Flags flags )
 
 TTNode TT_search( TTree tree, const char *s )
 {
+    TTNode node;
+
     if( !tree || !tree->head || !s || !*s ) {
         return NULL;
     }
 
-    return _TT_search( tree->head->mid, s, tree->flags );
+    __lock( tree->lock );
+    node = _TT_search( tree->head->mid, s, tree->flags );
+    __unlock( tree->lock );
+    return node;
 }
 
 /*
@@ -228,18 +243,24 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void *data,
 }
 TTNode TT_insert( TTree tree, const char *s, void *data )
 {
+    TTNode node;
+
     if( !tree || !tree->head || !s || !*s ) {
         return NULL;
     }
 
+    __lock( tree->lock );
     tree->head->mid = _TT_insert( tree->head->mid, s, 0, data, tree, 1 );
 
     if( !tree->head->mid ) {
+        __unlock( tree->lock );
         return NULL;
     }
 
-    return ( tree->flags & T_INSERT_FAST ) ?
+    node = ( tree->flags & T_INSERT_FAST ) ?
            tree->head : _TT_search( tree->head->mid, s, tree->flags );
+    __unlock( tree->lock );
+    return node;
 }
 
 /*
@@ -277,19 +298,25 @@ static void _TT_walk_desc( TTNode node, TT_Walk walker, void *data )
 void TT_walk( TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
+        __lock( tree->lock );
         _TT_walk( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 void TT_walk_asc( TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
+        __lock( tree->lock );
         _TT_walk_asc( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 void TT_walk_desc( TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
+        __lock( tree->lock );
         _TT_walk_desc( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 
@@ -332,6 +359,7 @@ static void _TT_data( TTNode node, void *data )
         }
     }
 }
+
 TT_Data TT_data( TTree tree, size_t *count )
 {
     struct {
@@ -455,6 +483,7 @@ static void _TT_dump( TTNode node, Tree_DataDump dumper, char *indent, int last,
         indent[strip] = 0;
     }
 }
+
 int TT_dump( TTree tree, Tree_DataDump dumper, FILE *handle )
 {
     size_t depth = TT_depth( tree );
@@ -464,7 +493,9 @@ int TT_dump( TTree tree, Tree_DataDump dumper, FILE *handle )
         fprintf( handle, "nodes: %zu, keys: %zu, depth: %zu\n",
                  tree->nodes/*TT_nodes( tree )*/, tree->keys/*TT_keys( tree )*/,
                  TT_depth( tree ) );
+        __lock( tree->lock );
         _TT_dump( tree->head, dumper, buf, 0, handle );
+        __unlock( tree->lock );
         Free( buf );
         return 1;
     }
@@ -499,6 +530,7 @@ TTNode __TT_lookup( TTNode node, const char *s, Tree_Flags flags )
 
     return ptr;
 }
+
 TT_Data _TT_lookup( TTree tree, const char *prefix, size_t max,
                     size_t *count )
 {
@@ -543,6 +575,7 @@ TT_Data _TT_lookup( TTree tree, const char *prefix, size_t max,
 
     return data.data;
 }
+
 TTree TT_lookup_tree( TTree tree, const char *prefix )
 {
     TTree rc = TT_create( tree->flags, NULL );
@@ -552,6 +585,7 @@ TTree TT_lookup_tree( TTree tree, const char *prefix )
         return NULL;
     }
 
+    __lock( tree->lock );
     data = _TT_lookup( tree, prefix, 0, NULL );
     ptr = data;
 
@@ -561,6 +595,7 @@ TTree TT_lookup_tree( TTree tree, const char *prefix )
         ptr++;
     }
 
+    __unlock( tree->lock );
     Free( data );
     return rc;
 }

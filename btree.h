@@ -34,6 +34,7 @@ typedef struct _BTree {
     Tree_Destroy destructor;
     size_t nodes;
     BTNode head;
+    __lock_t( lock );
 } *BTree;
 
 BTree BT_create( Tree_Flags flags, Tree_Destroy destructor );

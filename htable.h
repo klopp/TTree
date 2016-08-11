@@ -20,7 +20,7 @@ extern "C" {
 
 typedef struct _HTable {
     BTree bt;
-    __lock_t lock;
+    __lock_t( lock );
 } *HTable;
 
 HTable HT_create( Tree_Flags flags, Tree_Destroy destructor );
@@ -49,7 +49,7 @@ int HT_delete_c( HTable ht, const char *key );
 /*
  * HT_set_char( ht, 'c', data );
  * HT_set_int( ht, -1, data );
- * HT_set_ulong( ht, 1234, data );
+ * HT_set_ulong( ht, 12345678, data );
  * ... etc
  */
 #define HT_INTEGER(tag, type) \

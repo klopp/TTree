@@ -24,6 +24,7 @@ STree ST_create( Tree_Flags flags, Tree_Destroy destructor )
     }
 
     tree->flags = flags;
+    __initlock( tree->lock );
     return tree;
 }
 
@@ -46,13 +47,17 @@ static void _ST_clear( STree tree, STNode *node )
 void ST_clear( STree tree )
 {
     if( tree ) {
+        __lock( tree->lock );
         _ST_clear( tree, &tree->head );
+        __unlock( tree->lock );
     }
 }
 
 void ST_destroy( STree tree )
 {
+    __lock( tree->lock );
     _ST_clear( tree, &tree->head );
+    __unlock( tree->lock );
     Free( tree );
 }
 
@@ -117,12 +122,14 @@ STNode ST_insert( STree tree, TREE_KEY_TYPE key, void *data )
         return NULL;
     }
 
+    __lock( tree->lock );
     STNode node = _ST_insert( tree, &tree->head, key, data, 0 );
 
     if( node ) {
         tree->nodes++;
     }
 
+    __unlock( tree->lock );
     return node;
 }
 
@@ -237,7 +244,9 @@ static STNode *_ST_search( STNode *node, TREE_KEY_TYPE key )
 STNode ST_search( STree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         STNode *node = _ST_search( &tree->head, key );
+        __unlock( tree->lock );
 
         if( node && *node && ( *node )->key == key ) {
             return *node;
@@ -262,7 +271,11 @@ static size_t _ST_depth( STNode node, size_t depth )
 
 size_t ST_depth( STree tree )
 {
-    return _ST_depth( tree->head, 0 );
+    size_t rc;
+    __lock( tree->lock );
+    rc = _ST_depth( tree->head, 0 );
+    __unlock( tree->lock );
+    return rc;
 }
 
 /*
@@ -304,6 +317,9 @@ size_t ST_depth( STree tree )
 
 int ST_delete( STree tree, TREE_KEY_TYPE key )
 {
+    int rc = 0;
+    __lock( tree->lock );
+
     if( tree && tree->head ) {
         STNode *node = _ST_search( &tree->head, key );
 
@@ -327,10 +343,11 @@ int ST_delete( STree tree, TREE_KEY_TYPE key )
             tree->nodes--;
         }
 
-        return 1;
+        rc++;
     }
 
-    return 0;
+    __unlock( tree->lock );
+    return rc;
 }
 
 static void _ST_walk( STNode node, ST_Walk walker, void *data )
@@ -345,7 +362,9 @@ static void _ST_walk( STNode node, ST_Walk walker, void *data )
 void ST_walk( STree tree, ST_Walk walker, void *data )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         _ST_walk( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 
@@ -390,7 +409,9 @@ int ST_dump( STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 
         if( buf ) {
             fprintf( handle, "nodes: %zu, depth: %zu\n", tree->nodes, depth );
+            __lock( tree->lock );
             _ST_dump( tree->head, kdumper, ddumper, buf, 1, handle );
+            __unlock( tree->lock );
             Free( buf );
             return 1;
         }

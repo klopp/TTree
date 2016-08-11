@@ -102,6 +102,7 @@ BTree BT_create( Tree_Flags flags, Tree_Destroy destructor )
     }
 
     tree->flags = flags;
+    __initlock( tree->lock );
     return tree;
 }
 
@@ -169,13 +170,17 @@ static void _BT_clear( BTree tree, BTNode *node )
 void BT_clear( BTree tree )
 {
     if( tree ) {
+        __lock( tree->lock );
         _BT_clear( tree, &tree->head );
+        __unlock( tree->lock );
     }
 }
 
 void BT_destroy( BTree tree )
 {
+    __lock( tree->lock );
     _BT_clear( tree, &tree->head );
+    __unlock( tree->lock );
     Free( tree );
 }
 
@@ -193,7 +198,9 @@ static BTNode *_BT_search( BTNode *node, int key )
 BTNode BT_search( BTree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         BTNode *node = _BT_search( &tree->head, key );
+        __unlock( tree->lock );
 
         if( node ) {
             return *node;
@@ -206,12 +213,14 @@ BTNode BT_search( BTree tree, TREE_KEY_TYPE key )
 int BT_delete( BTree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         BTNode *node = _BT_search( &tree->head, key );
 
         if( node ) {
             *node = _BN_delete( tree, node, key );
         }
 
+        __unlock( tree->lock );
         return 1;
     }
 
@@ -280,6 +289,7 @@ BTNode BT_insert( BTree tree, TREE_KEY_TYPE key, void *data )
         return NULL;
     }
 
+    __lock( tree->lock );
     BTNode node = _BT_insert( tree, tree->head, key, data, 0 );
 
     if( node ) {
@@ -287,6 +297,7 @@ BTNode BT_insert( BTree tree, TREE_KEY_TYPE key, void *data )
         tree->head = node;
     }
 
+    __unlock( tree->lock );
     return node;
 }
 
@@ -311,14 +322,18 @@ static void _BT_walk_desc( void *node, BT_Walk walker, void *data )
 void BT_walk( BTree tree, BT_Walk walker, void *data )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         _BT_walk_asc( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 
 void BT_walk_desc( BTree tree, BT_Walk walker, void *data )
 {
     if( tree && tree->head ) {
+        __lock( tree->lock );
         _BT_walk_desc( tree->head, walker, data );
+        __unlock( tree->lock );
     }
 }
 
@@ -368,7 +383,11 @@ static size_t _BT_depth( BTNode node, size_t depth )
 
 size_t BT_depth( BTree tree )
 {
-    return _BT_depth( tree->head, 0 );
+    size_t rc;
+    __lock( tree->lock );
+    rc = _BT_depth( tree->head, 0 );
+    __unlock( tree->lock );
+    return rc;
 }
 
 int BT_dump( BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
@@ -379,7 +398,9 @@ int BT_dump( BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 
     if( buf ) {
         fprintf( handle, "nodes: %zu, depth: %zu\n", tree->nodes, depth );
+        __lock( tree->lock );
         _BT_dump( tree->head, kdumper, ddumper, buf, 1, handle );
+        __unlock( tree->lock );
         Free( buf );
         return 1;
     }
