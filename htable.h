@@ -31,6 +31,7 @@ void HT_destroy( HTable ht );
 
 unsigned int HT_set( HTable ht, const void *key, void *data );
 void *HT_get( HTable ht, const void *key );
+void *HT_get_k( HTable ht, unsigned int key );
 int HT_delete( HTable ht, const void *key );
 
 #define HT_create_c( flags, destructor ) HT_create( (flags), (destructor), 0 )

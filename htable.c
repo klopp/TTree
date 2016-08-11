@@ -42,7 +42,12 @@ unsigned int HT_set( HTable ht, const void *key, void *data )
 void *HT_get( HTable ht, const void *key )
 {
     unsigned int crc = crc32( key, ht->key_size );
-    BTNode btn = BT_search( ht->bt, crc );
+    return HT_get_k( ht, crc );
+}
+
+void *HT_get_k( HTable ht, unsigned int key )
+{
+    BTNode btn = BT_search( ht->bt, key );
     return btn ? btn->data : NULL;
 }
 
