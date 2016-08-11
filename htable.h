@@ -18,12 +18,28 @@
 extern "C" {
 #endif
 
+typedef enum
+{
+    HF_HASH_LY,
+    HF_HASH_ROT13,
+    HF_HASH_RS,
+    HF_HASH_FAQ6,
+    HF_HASH_CRC16,
+    HF_HASH_CRC32,
+    HF_HASH_MAX
+}
+HT_Hash_Functions;
+
+typedef unsigned int ( *HT_Hash_Function )( const void *data, size_t size );
+
 typedef struct _HTable {
     BTree bt;
+    HT_Hash_Function hf;
     __lock_t( lock );
 } *HTable;
 
-HTable HT_create( Tree_Flags flags, Tree_Destroy destructor );
+HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
+                  Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 

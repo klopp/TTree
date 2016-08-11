@@ -5,23 +5,37 @@
 
 #include "htable.h"
 #include "../klib/crc.h"
+#include "../klib/hash.h"
 
-HTable HT_create( Tree_Flags flags, Tree_Destroy destructor )
+static unsigned int _crc16( const void *buf, size_t size )
 {
-    HTable ht = Malloc( sizeof( struct _HTable ) );
+    return crc16( buf, size );
+}
 
-    if( ht ) {
-        /*
-         * Always replace values:
-         */
-        ht->bt = BT_create( flags | T_INSERT_REPLACE, destructor );
+static HT_Hash_Function _hf[] = { hash_ly, hash_rot13, hash_rs, hash_faq6, _crc16, crc32 };
 
-        if( !ht->bt ) {
-            Free( ht );
-            ht = NULL;
+HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
+                  Tree_Destroy destructor )
+{
+    HTable ht = NULL;
+
+    if( hf <= HF_HASH_MAX ) {
+        ht = Malloc( sizeof( struct _HTable ) );
+
+        if( ht ) {
+            /*
+             * Always replace values:
+             */
+            ht->bt = BT_create( flags | T_INSERT_REPLACE, destructor );
+
+            if( !ht->bt ) {
+                Free( ht );
+                ht = NULL;
+            }
+
+            __initlock( ht->lock );
+            ht->hf = _hf[hf];
         }
-
-        __initlock( ht->lock );
     }
 
     return ht;
@@ -44,18 +58,18 @@ void HT_destroy( HTable ht )
 
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
-    unsigned int crc;
+    unsigned int hash;
     BTNode btn;
     __lock( ht->lock );
-    crc = crc32( key, key_size );
-    btn = BT_insert( ht->bt, crc, data );
+    hash = ht->hf( key, key_size );
+    btn = BT_insert( ht->bt, hash, data );
     __unlock( ht->lock );
-    return btn ? crc : 0;
+    return btn ? hash : 0;
 }
 
 void *HT_get( HTable ht, const void *key, size_t key_size )
 {
-    return HT_get_k( ht, crc32( key, key_size ) );
+    return HT_get_k( ht, ht->hf( key, key_size ) );
 }
 
 void *HT_get_k( HTable ht, unsigned int key )
@@ -69,7 +83,7 @@ void *HT_get_k( HTable ht, unsigned int key )
 
 int HT_delete( HTable ht, const void *key, size_t key_size )
 {
-    return HT_delete_k( ht, crc32( key, key_size ) );
+    return HT_delete_k( ht, ht->hf( key, key_size ) );
 }
 
 int HT_delete_k( HTable ht, unsigned int key )
