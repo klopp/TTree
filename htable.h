@@ -3,16 +3,15 @@
  *      Author: klopp
  */
 
-/*
- *  That's All, Folks!
- */
 #ifndef HTABLE_H_
 #define HTABLE_H_
 
 #include "btree.h"
+#include "../klib/_lock.h"
 
 /*
- * Hash table, based on Balanced Trees
+ * Hash table, based on Balanced Trees.
+ * Presets for integer and C-string keys.
  */
 
 #if defined(__cplusplus)
@@ -21,13 +20,10 @@ extern "C" {
 
 typedef struct _HTable {
     BTree bt;
-    /*
-        size_t key_size;
-    */
+    __lock_t lock;
 } *HTable;
 
-HTable HT_create( Tree_Flags flags,
-                  Tree_Destroy destructor/*, size_t key_size*/ );
+HTable HT_create( Tree_Flags flags, Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 
@@ -36,15 +32,10 @@ void *HT_get( HTable ht, const void *key, size_t key_size );
 void *HT_get_k( HTable ht, unsigned int key );
 int HT_delete( HTable ht, const void *key, size_t key_size );
 
-/*
-#define HT_create_c( flags, destructor ) HT_create( (flags), (destructor), 0 )
-*/
 unsigned int HT_set_c( HTable ht, const char *key, void *data );
 void *HT_get_c( HTable ht, const char *key );
 int HT_delete_c( HTable ht, const char *key );
-/*
-        HTable HT_create_##tag( Tree_Flags flags, Tree_Destroy destructor ); \
-*/
+
 #define HT_INTEGER(tag,type) \
         unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
         void *HT_get_##tag( HTable ht, type key); \
