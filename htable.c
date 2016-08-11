@@ -66,9 +66,14 @@ void *HT_get_k( HTable ht, unsigned int key )
 
 int HT_delete( HTable ht, const void *key, size_t key_size )
 {
+    return HT_delete_k( ht, crc32( key, key_size ) );
+}
+
+int HT_delete_k( HTable ht, unsigned int key )
+{
     int rc;
     __lock( ht->lock );
-    rc = BT_delete( ht->bt, crc32( key, key_size ) );
+    rc = BT_delete( ht->bt, key );
     __unlock( ht->lock );
     return rc;
 }
