@@ -6,12 +6,15 @@
 #include "htable.h"
 #include "../klib/crc.h"
 
-HTable HT_create( Tree_Flags flags, Tree_Destroy destructor, size_t key_size )
+HTable HT_create( Tree_Flags flags,
+                  Tree_Destroy destructor/*, size_t key_size*/ )
 {
     HTable ht = Malloc( sizeof( struct _HTable ) );
 
     if( ht ) {
-        ht->key_size = key_size;
+        /*
+                ht->key_size = key_size;
+        */
         ht->bt = BT_create( flags, destructor );
 
         if( !ht->bt ) {
@@ -33,15 +36,15 @@ void HT_destroy( HTable ht )
     Free( ht );
 }
 
-unsigned int HT_set( HTable ht, const void *key, void *data )
+unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
-    unsigned int crc = crc32( key, ht->key_size );
+    unsigned int crc = crc32( key, /*ht->*/key_size );
     return BT_insert( ht->bt, crc, data ) ? crc : 0;
 }
 
-void *HT_get( HTable ht, const void *key )
+void *HT_get( HTable ht, const void *key, size_t key_size )
 {
-    unsigned int crc = crc32( key, ht->key_size );
+    unsigned int crc = crc32( key, /*ht->*/key_size );
     return HT_get_k( ht, crc );
 }
 
@@ -51,42 +54,51 @@ void *HT_get_k( HTable ht, unsigned int key )
     return btn ? btn->data : NULL;
 }
 
-int HT_delete( HTable ht, const void *key )
+int HT_delete( HTable ht, const void *key, size_t key_size )
 {
-    unsigned int crc = crc32( key, ht->key_size );
+    unsigned int crc = crc32( key, /*ht->*/key_size );
     return BT_delete( ht->bt, crc );
 }
 
 unsigned int HT_set_c( HTable ht, const char *key, void *data )
 {
-    ht->key_size = strlen( key );
-    return HT_set( ht, key, data );
+    /*
+        ht->key_size = strlen( key );
+    */
+    return HT_set( ht, key, strlen( key ), data );
 }
 
 void *HT_get_c( HTable ht, const char *key )
 {
-    ht->key_size = strlen( key );
-    return HT_get( ht, key );
+    /*
+        ht->key_size = strlen( key );
+    */
+    return HT_get( ht, key, strlen( key ) );
 }
 
 int HT_delete_c( HTable ht, const char *key )
 {
-    ht->key_size = strlen( key );
-    return HT_delete( ht, key );
+    /*
+         ht->key_size = strlen( key );
+    */
+    return HT_delete( ht, key, strlen( key ) );
 }
 
-#define HT_INTEGER_IMPL(tag,type) \
+/*
     HTable HT_create_##tag( Tree_Flags flags, Tree_Destroy destructor ) { \
         return HT_create( flags, destructor, sizeof(type) ); \
     } \
+*/
+
+#define HT_INTEGER_IMPL(tag,type) \
     unsigned int HT_set_##tag( HTable ht, type key, void *data ) { \
-        return HT_set( ht, &key, data ); \
+        return HT_set( ht, &key, sizeof(key), data ); \
     } \
     void *HT_get_##tag( HTable ht, type key) {; \
-        return HT_get( ht, &key ); \
+        return HT_get( ht, &key, sizeof(key) ); \
     } \
     int HT_delete_##tag( HTable ht, type key) { \
-        return HT_delete( ht, &key ); \
+        return HT_delete( ht, &key, sizeof(key) ); \
     }
 
 HT_INTEGER_IMPL( char, char );

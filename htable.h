@@ -21,27 +21,31 @@ extern "C" {
 
 typedef struct _HTable {
     BTree bt;
-    size_t key_size;
-
+    /*
+        size_t key_size;
+    */
 } *HTable;
 
-HTable HT_create( Tree_Flags flags, Tree_Destroy destructor, size_t key_size );
+HTable HT_create( Tree_Flags flags,
+                  Tree_Destroy destructor/*, size_t key_size*/ );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 
-unsigned int HT_set( HTable ht, const void *key, void *data );
-void *HT_get( HTable ht, const void *key );
+unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data );
+void *HT_get( HTable ht, const void *key, size_t key_size );
 void *HT_get_k( HTable ht, unsigned int key );
-int HT_delete( HTable ht, const void *key );
+int HT_delete( HTable ht, const void *key, size_t key_size );
 
+/*
 #define HT_create_c( flags, destructor ) HT_create( (flags), (destructor), 0 )
+*/
 unsigned int HT_set_c( HTable ht, const char *key, void *data );
 void *HT_get_c( HTable ht, const char *key );
 int HT_delete_c( HTable ht, const char *key );
-
-
-#define HT_INTEGER(tag,type) \
+/*
         HTable HT_create_##tag( Tree_Flags flags, Tree_Destroy destructor ); \
+*/
+#define HT_INTEGER(tag,type) \
         unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
         void *HT_get_##tag( HTable ht, type key); \
         int HT_delete_##tag( HTable ht, type key);
