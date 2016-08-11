@@ -2,5 +2,5 @@
 * Splay tree
 * Ternary tree
 * Ternary strings tree
-* AVL (balanced) tree & CRC32 based hash table
+* AVL (balanced) tree based hash table
 
