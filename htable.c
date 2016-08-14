@@ -38,11 +38,10 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
             ht->bt[i] = BT_create( flags | T_INSERT_REPLACE, destructor );
 
             if( !ht->bt[i] ) {
-                do {
+                while( i ) {
                     i--;
                     BT_destroy( ht->bt[i] );
                 }
-                while( i );
 
                 Free( ht );
                 ht = NULL;
