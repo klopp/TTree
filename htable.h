@@ -21,10 +21,10 @@ extern "C" {
 
 typedef enum
 {
+    HF_HASH_FAQ6 = 0,
     HF_HASH_LY,
     HF_HASH_ROT13,
     HF_HASH_RS,
-    HF_HASH_FAQ6,
     HF_HASH_CRC16,
     HF_HASH_CRC32,
     HF_HASH_MAX

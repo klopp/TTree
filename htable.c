@@ -20,32 +20,34 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
     HTable ht = NULL;
 
     if( hf <= HF_HASH_MAX ) {
-        ht = Malloc( sizeof( struct _HTable ) );
+        hf = 0;
+    }
 
-        if( ht ) {
-            size_t i;
+    ht = Malloc( sizeof( struct _HTable ) );
 
-            for( i = 0; i < UCHAR_MAX; i++ ) {
-                /*
-                 * Always replace values (T_INSERT_REPLACE flag):
-                 */
-                ht->bt[i] = BT_create( flags | T_INSERT_REPLACE, destructor );
+    if( ht ) {
+        size_t i;
 
-                if( !ht->bt[i] ) {
-                    do {
-                        i--;
-                        BT_destroy( ht->bt[i] );
-                    }
-                    while( i );
+        for( i = 0; i < UCHAR_MAX; i++ ) {
+            /*
+             * Always replace values (T_INSERT_REPLACE flag):
+             */
+            ht->bt[i] = BT_create( flags | T_INSERT_REPLACE, destructor );
 
-                    Free( ht );
-                    ht = NULL;
+            if( !ht->bt[i] ) {
+                do {
+                    i--;
+                    BT_destroy( ht->bt[i] );
                 }
-            }
+                while( i );
 
-            __initlock( ht->lock );
-            ht->hf = _hf[hf];
+                Free( ht );
+                ht = NULL;
+            }
         }
+
+        __initlock( ht->lock );
+        ht->hf = _hf[hf];
     }
 
     return ht;
@@ -144,7 +146,6 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 
     return errors;
 }
-
 
 #define HT_INTEGER_IMPL(tag, type) \
     unsigned int HT_set_##tag( HTable ht, type key, void *data ) { \
