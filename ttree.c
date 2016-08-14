@@ -231,7 +231,7 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void *data,
             }
 
             /*
-             * TODO free data?
+             * do not free data
              */
         }
     }

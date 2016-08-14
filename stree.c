@@ -111,7 +111,7 @@ static STNode _ST_insert( STree tree, STNode *node, TREE_KEY_TYPE key,
     }
 
     /*
-     * TODO free data?
+     * do not free data
      */
     return NULL;
 }

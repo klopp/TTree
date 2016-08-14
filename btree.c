@@ -274,7 +274,7 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void *data,
         }
         else {
             /*
-             * TODO free data?
+             * do not free data
              */
             return NULL;
         }
