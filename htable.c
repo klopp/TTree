@@ -7,7 +7,10 @@
 #include "../klib/crc.h"
 #include "../klib/hash.h"
 
-static unsigned int _crc16( const void *buf, size_t size )
+/*
+ * Because crc16() return short:
+ */
+static inline unsigned int _crc16( const void *buf, size_t size )
 {
     return crc16( buf, size );
 }
