@@ -58,6 +58,8 @@ int HT_delete_k( HTable ht, unsigned int key );
 
 /*
  * C-strings keys handling:
+ * HT_set_c( ht, "foobar", data );
+ * ... etc
  */
 unsigned int HT_set_c( HTable ht, const char *key, void *data );
 void *HT_get_c( HTable ht, const char *key );
