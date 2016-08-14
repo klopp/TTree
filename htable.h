@@ -6,11 +6,12 @@
 #ifndef HTABLE_H_
 #define HTABLE_H_
 
+#include <limits.h>
 #include "btree.h"
 #include "../klib/_lock.h"
 
 /*
- * Hash table, based on Balanced Trees & CRC32.
+ * Hash table, based on Balanced Trees.
  * Presets for integer and C-string keys.
  */
 
@@ -33,7 +34,7 @@ HT_Hash_Functions;
 typedef unsigned int ( *HT_Hash_Function )( const void *data, size_t size );
 
 typedef struct _HTable {
-    BTree bt;
+    BTree bt[UCHAR_MAX];
     HT_Hash_Function hf;
     __lock_t( lock );
 } *HTable;
@@ -61,6 +62,9 @@ int HT_delete_k( HTable ht, unsigned int key );
 unsigned int HT_set_c( HTable ht, const char *key, void *data );
 void *HT_get_c( HTable ht, const char *key );
 int HT_delete_c( HTable ht, const char *key );
+
+int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+             FILE *handle );
 
 /*
  * HT_set_char( ht, 'c', data );

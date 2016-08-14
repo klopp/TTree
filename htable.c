@@ -23,14 +23,24 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
         ht = Malloc( sizeof( struct _HTable ) );
 
         if( ht ) {
-            /*
-             * Always replace values:
-             */
-            ht->bt = BT_create( flags | T_INSERT_REPLACE, destructor );
+            size_t i;
 
-            if( !ht->bt ) {
-                Free( ht );
-                ht = NULL;
+            for( i = 0; i < UCHAR_MAX; i++ ) {
+                /*
+                 * Always replace values (T_INSERT_REPLACE flag):
+                 */
+                ht->bt[i] = BT_create( flags | T_INSERT_REPLACE, destructor );
+
+                if( !ht->bt[i] ) {
+                    do {
+                        i--;
+                        BT_destroy( ht->bt[i] );
+                    }
+                    while( i );
+
+                    Free( ht );
+                    ht = NULL;
+                }
             }
 
             __initlock( ht->lock );
@@ -43,15 +53,25 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
 
 void HT_clear( HTable ht )
 {
+    size_t i;
     __lock( ht->lock );
-    BT_clear( ht->bt );
+
+    for( i = 0; i < UCHAR_MAX; i++ ) {
+        BT_clear( ht->bt[i] );
+    }
+
     __unlock( ht->lock );
 }
 
 void HT_destroy( HTable ht )
 {
+    size_t i;
     __lock( ht->lock );
-    BT_destroy( ht->bt );
+
+    for( i = 0; i < UCHAR_MAX; i++ ) {
+        BT_destroy( ht->bt[i] );
+    }
+
     __unlock( ht->lock );
     Free( ht );
 }
@@ -62,7 +82,7 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
     BTNode btn;
     __lock( ht->lock );
     hash = ht->hf( key, key_size );
-    btn = BT_insert( ht->bt, hash, data );
+    btn = BT_insert( ht->bt[hash & UCHAR_MAX], hash, data );
     __unlock( ht->lock );
     return btn ? hash : 0;
 }
@@ -76,7 +96,7 @@ void *HT_get_k( HTable ht, unsigned int key )
 {
     BTNode btn;
     __lock( ht->lock );
-    btn = BT_search( ht->bt, key );
+    btn = BT_search( ht->bt[key & UCHAR_MAX], key );
     __unlock( ht->lock );
     return btn ? btn->data : NULL;
 }
@@ -90,7 +110,7 @@ int HT_delete_k( HTable ht, unsigned int key )
 {
     int rc;
     __lock( ht->lock );
-    rc = BT_delete( ht->bt, key );
+    rc = BT_delete( ht->bt[key & UCHAR_MAX], key );
     __unlock( ht->lock );
     return rc;
 }
@@ -109,6 +129,22 @@ int HT_delete_c( HTable ht, const char *key )
 {
     return HT_delete( ht, key, strlen( key ) );
 }
+
+int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+             FILE *handle )
+{
+    size_t i;
+    int errors = 0;
+
+    for( i = 0; i < UCHAR_MAX; i++ ) {
+        if( ht->bt[i]->nodes ) {
+            errors += BT_dump( ht->bt[i], kdumper, ddumper, handle );
+        }
+    }
+
+    return errors;
+}
+
 
 #define HT_INTEGER_IMPL(tag, type) \
     unsigned int HT_set_##tag( HTable ht, type key, void *data ) { \
