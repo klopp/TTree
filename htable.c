@@ -15,7 +15,7 @@ static inline unsigned int _crc16( const void *buf, size_t size )
     return crc16( buf, size );
 }
 
-static HT_Hash_Function _hf[] = { hash_ly, hash_rot13, hash_rs, hash_faq6, _crc16, crc32 };
+static HT_Hash_Function _hf[] = { hash_faq6, hash_ly, hash_rot13, hash_rs, _crc16, crc32 };
 
 HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
                   Tree_Destroy destructor )
