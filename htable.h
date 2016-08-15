@@ -19,9 +19,15 @@
 extern "C" {
 #endif
 
-typedef enum
-{
-    HF_HASH_FAQ6 = 0, HF_HASH_LY, HF_HASH_ROT13, HF_HASH_RS, HF_HASH_CRC16,
+typedef struct _HTElem {
+    void *key;
+    size_t key_size;
+    void *data;
+    struct _HTElem *next;
+} *HTElem;
+
+typedef enum {
+    HF_HASH_FAQ6, HF_HASH_LY, HF_HASH_ROT13, HF_HASH_RS, HF_HASH_CRC16,
     HF_HASH_CRC32
 }
 HT_Hash_Functions;
@@ -32,11 +38,11 @@ typedef struct _HTable {
     AVLTree bt[UCHAR_MAX + 1];
     HT_Hash_Function hf;
     Tree_Error error;
+    Tree_Destroy destructor;
     __lock_t( lock );
 } *HTable;
 
-HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
-                  Tree_Destroy destructor );
+HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 size_t HT_size( HTable ht );
@@ -50,8 +56,10 @@ int HT_delete( HTable ht, const void *key, size_t key_size );
 /*
  * HT_get_k() and HT_delete_k() uses internal key values (see HT_set() return, faster):
  */
+/*
 void *HT_get_k( HTable ht, unsigned int key );
 int HT_delete_k( HTable ht, unsigned int key );
+*/
 
 /*
  * C-strings keys handling:

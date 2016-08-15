@@ -19,10 +19,13 @@ static struct {
     HT_Hash_Functions idx;
     HT_Hash_Function hf;
 
-} _hf[] = { {HF_HASH_FAQ6, hash_faq6}, {HF_HASH_LY, hash_ly}, {HF_HASH_ROT13, hash_rot13}, {HF_HASH_RS, hash_rs}, {HF_HASH_CRC16, _crc16}, {HF_HASH_CRC32, crc32} };
+} _hf[] = { { HF_HASH_FAQ6, hash_faq6 }, { HF_HASH_LY, hash_ly }, { HF_HASH_ROT13, hash_rot13 }, {
+        HF_HASH_RS,
+        hash_rs
+    }, { HF_HASH_CRC16, _crc16 }, { HF_HASH_CRC32, crc32 }
+};
 
-HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
-                  Tree_Destroy destructor )
+HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor )
 {
     HTable ht = NULL;
     ht = Malloc( sizeof( struct _HTable ) );
@@ -34,7 +37,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
             /*
              * Always replace values (T_INSERT_REPLACE flag):
              */
-            ht->bt[i] = AVL_create( flags | 0/*T_INSERT_REPLACE*/, destructor );
+            ht->bt[i] = AVL_create( T_FREE_DEFAULT, NULL );
 
             if( !ht->bt[i] ) {
                 while( i ) {
@@ -60,6 +63,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
             ht->hf = _hf[0].hf;
         }
 
+        ht->destructor = destructor;
         ht->error = TE_NO_ERROR;
     }
 
@@ -110,40 +114,80 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
     unsigned int hash;
     AVLNode node;
+    HTElem e;
     __lock( ht->lock );
+    e = Malloc( sizeof( struct _HTElem ) );
+
+    if( !e ) {
+        ht->error = TE_MEMORY;
+        __unlock( ht->lock );
+        return 0;
+    }
+
+    e->key = Malloc( key_size );
+
+    if( !e->key ) {
+        Free( e );
+        ht->error = TE_MEMORY;
+        __unlock( ht->lock );
+        return 0;
+    }
+
+    memcpy( e->key, key, key_size );
+    e->data = data;
+    e->next = NULL;
+    e->key_size = key_size;
     hash = ht->hf( key, key_size );
-    node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, data );
+    node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
     ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
     return node ? hash : 0;
 }
 
+/*
+void *HT_get(HTable ht, const void *key, size_t key_size)
+{
+    return HT_get_k(ht, ht->hf(key, key_size));
+}
+*/
+
+/*void *HT_get_k(HTable ht, unsigned int key)*/
 void *HT_get( HTable ht, const void *key, size_t key_size )
 {
-    return HT_get_k( ht, ht->hf( key, key_size ) );
-}
-
-void *HT_get_k( HTable ht, unsigned int key )
-{
-    AVLNode btn;
+    AVLNode node;
+    //HTElem e;
+    unsigned int hash;
     __lock( ht->lock );
-    btn = AVL_search( ht->bt[key & UCHAR_MAX], key );
-    ht->error = ht->bt[key & UCHAR_MAX]->error;
+    hash = ht->hf( key, key_size );
+    node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
+    ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
-    return btn ? btn->data : NULL;
+    return node ? ( ( HTElem )node->data )->data : NULL;
 }
 
+/*
+int HT_delete(HTable ht, const void *key, size_t key_size)
+{
+    return HT_delete_k(ht, ht->hf(key, key_size));
+}
+*/
+
+/*int HT_delete_k(HTable ht, unsigned int key)*/
 int HT_delete( HTable ht, const void *key, size_t key_size )
 {
-    return HT_delete_k( ht, ht->hf( key, key_size ) );
-}
-
-int HT_delete_k( HTable ht, unsigned int key )
-{
-    int rc;
+    int rc = 0;
+    AVLNode node;
+    unsigned int hash;
     __lock( ht->lock );
-    rc = AVL_delete( ht->bt[key & UCHAR_MAX], key );
-    ht->error = ht->bt[key & UCHAR_MAX]->error;
+    hash = ht->hf( key, key_size );
+    node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
+
+    if( node ) {
+        rc = AVL_delete( ht->bt[hash & UCHAR_MAX], hash );
+    }
+
+    //rc = AVL_delete(ht->bt[key & UCHAR_MAX], key);
+    ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
     return rc;
 }
@@ -155,12 +199,12 @@ unsigned int HT_set_c( HTable ht, const char *key, void *data )
 
 void *HT_get_c( HTable ht, const char *key )
 {
-    return HT_get_k( ht, ht->hf( key, strlen( key ) ) );
+    return HT_get( ht, key, strlen( key ) );
 }
 
 int HT_delete_c( HTable ht, const char *key )
 {
-    return HT_delete_k( ht, ht->hf( key, strlen( key ) ) );
+    return HT_delete( ht, key, strlen( key ) );
 }
 
 int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
