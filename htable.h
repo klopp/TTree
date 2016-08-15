@@ -21,13 +21,8 @@ extern "C" {
 
 typedef enum
 {
-    HF_HASH_FAQ6 = 0,
-    HF_HASH_LY,
-    HF_HASH_ROT13,
-    HF_HASH_RS,
-    HF_HASH_CRC16,
-    HF_HASH_CRC32,
-    HF_HASH_MAX
+    HF_HASH_FAQ6 = 0, HF_HASH_LY, HF_HASH_ROT13, HF_HASH_RS, HF_HASH_CRC16,
+    HF_HASH_CRC32
 }
 HT_Hash_Functions;
 
@@ -36,6 +31,7 @@ typedef unsigned int ( *HT_Hash_Function )( const void *data, size_t size );
 typedef struct _HTable {
     AVLTree bt[UCHAR_MAX + 1];
     HT_Hash_Function hf;
+    Tree_Error error;
     __lock_t( lock );
 } *HTable;
 

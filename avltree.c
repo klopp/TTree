@@ -95,6 +95,7 @@ AVLTree AVL_create( Tree_Flags flags, Tree_Destroy destructor )
 
     tree->flags = flags;
     __initlock( tree->lock );
+    tree->error = TE_NO_ERROR;
     return tree;
 }
 
@@ -124,8 +125,9 @@ static AVLNode _AVL_delete( AVLTree tree, AVLNode *node, TREE_KEY_TYPE key )
         AVLNode z = ( *node )->right;
         AVLNode m;
 
-        if( tree->destructor && ( *node )->data ) tree->destructor(
-                ( *node )->data );
+        if( tree->destructor && ( *node )->data ) {
+            tree->destructor( ( *node )->data );
+        }
 
         Free( *node );
         *node = NULL;
@@ -150,8 +152,9 @@ static void _AVL_clear( AVLTree tree, AVLNode *node )
         _AVL_clear( tree, &( *node )->left );
         _AVL_clear( tree, &( *node )->right );
 
-        if( tree->destructor && ( *node )->data ) tree->destructor(
-                ( *node )->data );
+        if( tree->destructor && ( *node )->data ) {
+            tree->destructor( ( *node )->data );
+        }
 
         Free( *node );
         *node = NULL;
@@ -164,6 +167,7 @@ void AVL_clear( AVLTree tree )
     if( tree ) {
         __lock( tree->lock );
         _AVL_clear( tree, &tree->head );
+        tree->error = TE_NO_ERROR;
         __unlock( tree->lock );
     }
 }
@@ -178,11 +182,13 @@ void AVL_destroy( AVLTree tree )
 
 static AVLNode *_AVL_search( AVLNode *node, TREE_KEY_TYPE key )
 {
-    if( key < ( *node )->key ) return
-            ( *node )->left ? _AVL_search( &( *node )->left, key ) : NULL;
+    if( key < ( *node )->key ) {
+        return ( *node )->left ? _AVL_search( &( *node )->left, key ) : NULL;
+    }
 
-    if( key > ( *node )->key ) return
-            ( *node )->right ? _AVL_search( &( *node )->right, key ) : NULL;
+    if( key > ( *node )->key ) {
+        return ( *node )->right ? _AVL_search( &( *node )->right, key ) : NULL;
+    }
 
     return node;
 }
@@ -195,8 +201,11 @@ AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key )
         __unlock( tree->lock );
 
         if( node ) {
+            tree->error = TE_NO_ERROR;
             return *node;
         }
+
+        tree->error = TE_NOT_FOUND;
     }
 
     return NULL;
@@ -204,35 +213,43 @@ AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key )
 
 int AVL_delete( AVLTree tree, TREE_KEY_TYPE key )
 {
+    int rc = 0;
+
     if( tree && tree->head ) {
+        AVLNode *node;
         __lock( tree->lock );
-        AVLNode *node = _AVL_search( &tree->head, key );
+        node = _AVL_search( &tree->head, key );
 
         if( node ) {
             *node = _AVL_delete( tree, node, key );
+            rc = 1;
+        }
+        else {
+            tree->error = TE_NOT_FOUND;
         }
 
         __unlock( tree->lock );
-        return 1;
+        return rc;
     }
 
     return 0;
 }
 
 static AVLNode _AVL_insert( AVLTree tree, AVLNode node, TREE_KEY_TYPE key,
-                            void *data,
-                            size_t depth )
+                            void *data, size_t depth )
 {
     if( !node ) {
         node = Calloc( sizeof( struct _AVLNode ), 1 );
 
         if( !node ) {
+            tree->error = TE_MEMORY;
             return NULL;
         }
 
         node->key = key;
         node->data = data;
         node->height = 1;
+        tree->error = TE_NO_ERROR;
         return node;
     }
 
@@ -269,6 +286,7 @@ static AVLNode _AVL_insert( AVLTree tree, AVLNode node, TREE_KEY_TYPE key,
             /*
              * do not free data
              */
+            tree->error = TE_FOUND;
             return NULL;
         }
     }
@@ -278,37 +296,39 @@ static AVLNode _AVL_insert( AVLTree tree, AVLNode node, TREE_KEY_TYPE key,
 
 AVLNode AVL_insert( AVLTree tree, TREE_KEY_TYPE key, void *data )
 {
-    if( !tree ) {
-        return NULL;
+    AVLNode node = NULL;
+
+    if( tree ) {
+        __lock( tree->lock );
+        node = _AVL_insert( tree, tree->head, key, data, 0 );
+
+        if( node ) {
+            tree->error = TE_NO_ERROR;
+            tree->nodes++;
+            tree->head = node;
+        }
+
+        __unlock( tree->lock );
     }
 
-    __lock( tree->lock );
-    AVLNode node = _AVL_insert( tree, tree->head, key, data, 0 );
-
-    if( node ) {
-        tree->nodes++;
-        tree->head = node;
-    }
-
-    __unlock( tree->lock );
     return node;
 }
 
 static void _AVL_walk_asc( void *node, AVL_Walk walker, void *data )
 {
     if( node ) {
-        _AVL_walk_asc( ( ( AVLNode )node )->left, walker, data );
+        _AVL_walk_asc( ( ( AVLNode ) node )->left, walker, data );
         walker( node, data );
-        _AVL_walk_asc( ( ( AVLNode )node )->right, walker, data );
+        _AVL_walk_asc( ( ( AVLNode ) node )->right, walker, data );
     }
 }
 
 static void _AVL_walk_desc( void *node, AVL_Walk walker, void *data )
 {
     if( node ) {
-        _AVL_walk_desc( ( ( AVLNode )node )->right, walker, data );
+        _AVL_walk_desc( ( ( AVLNode ) node )->right, walker, data );
         walker( node, data );
-        _AVL_walk_desc( ( ( AVLNode )node )->left, walker, data );
+        _AVL_walk_desc( ( ( AVLNode ) node )->left, walker, data );
     }
 }
 
@@ -331,8 +351,7 @@ void AVL_walk_desc( AVLTree tree, AVL_Walk walker, void *data )
 }
 
 static void _AVL_dump( AVLNode node, Tree_KeyDump kdumper,
-                       Tree_DataDump ddumper,
-                       char *indent, int last,
+                       Tree_DataDump ddumper, char *indent, int last,
                        FILE *handle )
 {
     size_t strip = T_Indent( indent, last, handle );
@@ -341,7 +360,7 @@ static void _AVL_dump( AVLNode node, Tree_KeyDump kdumper,
         kdumper( node->key, handle );
     }
     else {
-        fprintf( handle, "[%llX]", ( long long )node->key );
+        fprintf( handle, "[%llX]", ( long long ) node->key );
     }
 
     if( ddumper ) {
@@ -350,8 +369,9 @@ static void _AVL_dump( AVLNode node, Tree_KeyDump kdumper,
 
     fprintf( handle, "\n" );
 
-    if( node->left ) _AVL_dump( node->left, kdumper, ddumper, indent, !node->right,
-                                    handle );
+    if( node->left ) {
+        _AVL_dump( node->left, kdumper, ddumper, indent, !node->right, handle );
+    }
 
     if( node->right ) {
         _AVL_dump( node->right, kdumper, ddumper, indent, 1, handle );

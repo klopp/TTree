@@ -54,6 +54,14 @@ typedef enum _Tree_Flags
 }
 Tree_Flags;
 
+typedef enum _Tree_Error {
+    TE_NO_ERROR = 0,
+    TE_NOT_FOUND,
+    TE_FOUND,
+    TE_MEMORY
+}
+Tree_Error;
+
 /*
  * Destroy tree data:
  */

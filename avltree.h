@@ -34,6 +34,7 @@ typedef struct _AVLTree {
     Tree_Destroy destructor;
     size_t nodes;
     AVLNode head;
+    Tree_Error error;
     __lock_t( lock );
 } *AVLTree;
 
