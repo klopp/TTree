@@ -34,11 +34,11 @@ extern "C"
 typedef enum _Tree_Flags
 {
     T_INSERT_REPLACE = 1,
-    T_DESTROY_ON_FAIL = 2,
+    /*T_DESTROY_ON_FAIL = 2,*/
     T_FREE_DEFAULT = 4,
     T_NOCASE = 1024,
     T_INSERT_FAST = 2096,
-    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE | T_DESTROY_ON_FAIL | T_FREE_DEFAULT )
+    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE /*| T_DESTROY_ON_FAIL */ | T_FREE_DEFAULT )
 }
 Tree_Flags;
 
