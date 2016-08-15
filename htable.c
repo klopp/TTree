@@ -76,8 +76,22 @@ void HT_destroy( HTable ht )
         BT_destroy( ht->bt[i] );
     }
 
-    /*__unlock( ht->lock );*/
     Free( ht );
+}
+
+size_t HT_size( HTable ht )
+{
+    size_t rc = 0;
+    size_t i = 0;
+    __lock( ht->lock );
+
+    while( i < UCHAR_MAX ) {
+        rc += ht->bt[i]->nodes;
+        i++;
+    }
+
+    __unlock( ht->lock );
+    return rc;
 }
 
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )

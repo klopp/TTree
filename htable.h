@@ -43,6 +43,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
                   Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
+size_t HT_size( HTable ht );
 
 /*
  * HT_set() return internal key value:
