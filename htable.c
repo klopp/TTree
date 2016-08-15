@@ -37,7 +37,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor )
             /*
              * Always replace values (T_INSERT_REPLACE flag):
              */
-            ht->bt[i] = AVL_create( T_FREE_DEFAULT, NULL );
+            ht->bt[i] = AVL_create( 0, NULL );
 
             if( !ht->bt[i] ) {
                 while( i ) {
@@ -70,12 +70,34 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor )
     return ht;
 }
 
+static void _HT_Free_Elem( HTElem e, HTable ht )
+{
+    if( e->next ) {
+        _HT_Free_Elem( e->next, ht );
+    }
+
+    if( ht->destructor ) {
+        ht->destructor( e->data );
+    }
+
+    Free( e->key );
+    Free( e );
+}
+
+static void _HT_Destructor( AVLNode node, void *data )
+{
+    HTElem e = node->data;
+    unused( data );
+    _HT_Free_Elem( e, data );
+}
+
 void HT_clear( HTable ht )
 {
     size_t i;
     __lock( ht->lock );
 
     for( i = 0; i <= UCHAR_MAX; i++ ) {
+        AVL_walk( ht->bt[i], _HT_Destructor, ht );
         AVL_clear( ht->bt[i] );
     }
 
@@ -89,6 +111,7 @@ void HT_destroy( HTable ht )
     __lock( ht->lock );
 
     for( i = 0; i <= UCHAR_MAX; i++ ) {
+        AVL_walk( ht->bt[i], _HT_Destructor, ht );
         AVL_destroy( ht->bt[i] );
     }
 
@@ -115,6 +138,7 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
     unsigned int hash;
     AVLNode node;
     HTElem e;
+    HTElem cursor;
     __lock( ht->lock );
     e = Malloc( sizeof( struct _HTElem ) );
 
@@ -134,45 +158,86 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
     }
 
     memcpy( e->key, key, key_size );
+    e->key_size = key_size;
     e->data = data;
     e->next = NULL;
-    e->key_size = key_size;
     hash = ht->hf( key, key_size );
-    node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
-    ht->error = ht->bt[hash & UCHAR_MAX]->error;
+    node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
+
+    if( !node ) {
+        node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
+        ht->error = ht->bt[hash & UCHAR_MAX]->error;
+        __unlock( ht->lock );
+        return node ? hash : 0;
+    }
+
+    cursor = node->data;
+
+    while( 1 ) {
+        /*
+         * Node found, check key:
+         */
+        if( cursor->key_size == key_size && !memcmp( cursor->key, key, key_size ) ) {
+            /*
+             * Keys equals, destroy & replace old data:
+             */
+            if( ht->destructor ) {
+                ht->destructor( cursor->data );
+            }
+
+            cursor->data = data;
+            Free( e->key );
+            Free( e );
+            __unlock( ht->lock );
+            return hash;
+        }
+
+        if( cursor->next ) {
+            cursor = cursor->next;
+            continue;
+        }
+
+        cursor->next = e;
+        break;
+    }
+
     __unlock( ht->lock );
-    return node ? hash : 0;
+    return hash;
 }
 
-/*
-void *HT_get(HTable ht, const void *key, size_t key_size)
-{
-    return HT_get_k(ht, ht->hf(key, key_size));
-}
-*/
-
-/*void *HT_get_k(HTable ht, unsigned int key)*/
 void *HT_get( HTable ht, const void *key, size_t key_size )
 {
     AVLNode node;
-    //HTElem e;
     unsigned int hash;
+    HTElem e;
     __lock( ht->lock );
+    e = NULL;
     hash = ht->hf( key, key_size );
     node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
+
+    if( node ) {
+        e = node->data;
+
+        if( !e->next ) {
+            __unlock( ht->lock );
+            return e->data;
+        }
+
+        do {
+            if( e->key_size == key_size && !memcmp( e->key, key, key_size ) ) {
+                break;
+            }
+
+            e = e->next;
+        }
+        while( e );
+    }
+
     ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
-    return node ? ( ( HTElem )node->data )->data : NULL;
+    return e ? e->data : NULL;
 }
 
-/*
-int HT_delete(HTable ht, const void *key, size_t key_size)
-{
-    return HT_delete_k(ht, ht->hf(key, key_size));
-}
-*/
-
-/*int HT_delete_k(HTable ht, unsigned int key)*/
 int HT_delete( HTable ht, const void *key, size_t key_size )
 {
     int rc = 0;
@@ -183,10 +248,13 @@ int HT_delete( HTable ht, const void *key, size_t key_size )
     node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
 
     if( node ) {
+        if( ht->destructor ) {
+            ht->destructor( ( ( HTElem ) node->data )->data );
+        }
+
         rc = AVL_delete( ht->bt[hash & UCHAR_MAX], hash );
     }
 
-    //rc = AVL_delete(ht->bt[key & UCHAR_MAX], key);
     ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
     return rc;
