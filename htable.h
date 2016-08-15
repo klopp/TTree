@@ -75,21 +75,21 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
  * HT_set_ulong( ht, 12345678, data );
  * ... etc
  */
-#define HT_INTEGER(tag, type) \
+#define HT_INTEGER_DECL(tag, type) \
         unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
         void *HT_get_##tag( HTable ht, type key); \
         int HT_delete_##tag( HTable ht, type key);
 
-HT_INTEGER( char, char );
-HT_INTEGER( uchar, unsigned char );
-HT_INTEGER( short, short );
-HT_INTEGER( ushort, unsigned short );
-HT_INTEGER( int, int );
-HT_INTEGER( uint, unsigned int );
-HT_INTEGER( long, long );
-HT_INTEGER( ulong, unsigned long );
-HT_INTEGER( llong, long long );
-HT_INTEGER( ullong, unsigned long long );
+HT_INTEGER_DECL( char, char );
+HT_INTEGER_DECL( uchar, unsigned char );
+HT_INTEGER_DECL( short, short );
+HT_INTEGER_DECL( ushort, unsigned short );
+HT_INTEGER_DECL( int, int );
+HT_INTEGER_DECL( uint, unsigned int );
+HT_INTEGER_DECL( long, long );
+HT_INTEGER_DECL( ulong, unsigned long );
+HT_INTEGER_DECL( llong, long long );
+HT_INTEGER_DECL( ullong, unsigned long long );
 
 #if defined(__cplusplus)
 }; /* extern "C" */
