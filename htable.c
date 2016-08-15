@@ -76,7 +76,7 @@ void HT_destroy( HTable ht )
         BT_destroy( ht->bt[i] );
     }
 
-    __unlock( ht->lock );
+    /*__unlock( ht->lock );*/
     Free( ht );
 }
 

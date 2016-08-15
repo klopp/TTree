@@ -27,16 +27,6 @@ extern "C"
 {
 #endif
 
-/*
-typedef struct _TNode
-{
-    union var key;
-    void * data;
-    void * right;
-    void * left;
-}*TNode;
-*/
-
 #ifndef TREE_KEY_TYPE
 # define TREE_KEY_TYPE int
 #endif
