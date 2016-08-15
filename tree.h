@@ -33,12 +33,24 @@ extern "C"
 
 typedef enum _Tree_Flags
 {
+    /*
+     * Replace elements on insert. For existing elements (*Tree_Destroy) function will be called:
+     */
     T_INSERT_REPLACE = 1,
-    /*T_DESTROY_ON_FAIL = 2,*/
-    T_FREE_DEFAULT = 4,
+    /*
+     * Use T_Free() function to destroy elements:
+     */
+    T_FREE_DEFAULT = 2,
+    /*
+     * Caseless comparison for TS_Tree data:
+     */
     T_NOCASE = 1024,
+    /*
+     * With this flag TT_insert() function (ternary trees) will return tree root.
+     * Without - link to created/replaced node.
+     */
     T_INSERT_FAST = 2096,
-    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE /*| T_DESTROY_ON_FAIL */ | T_FREE_DEFAULT )
+    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE | T_FREE_DEFAULT )
 }
 Tree_Flags;
 
@@ -57,10 +69,6 @@ typedef void ( *Tree_KeyDump )( TREE_KEY_TYPE key, FILE *handle );
  */
 size_t T_Indent( char *indent, int last, FILE *handle );
 
-/*
- * Used by walkers:
- */
-//typedef void (*Tree_Walk)( void * node, void * data );
 /*
  * Default free function (used with T_FREE_DEFAULT flag)
  */
