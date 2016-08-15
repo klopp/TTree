@@ -5,7 +5,7 @@
  *      Author: Vsevolod Lutovinov <klopp@yandex.ru>
  */
 
-#include "btree.h"
+#include "avltree.h"
 
 static int _BN_height( BTNode node )
 {

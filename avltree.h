@@ -9,8 +9,8 @@
  * Balanced tree with numeric key
  */
 
-#ifndef BTREE_H_
-#define BTREE_H_
+#ifndef AVLTREE_H_
+#define AVLTREE_H_
 
 #include "tree.h"
 
@@ -56,4 +56,4 @@ int BT_dump( BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 }
 #endif
 
-#endif /* BTREE_H_ */
+#endif /* AVLTREE_H_ */

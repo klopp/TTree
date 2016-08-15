@@ -65,7 +65,7 @@ typedef void ( *Tree_DataDump )( void *data, FILE *handle );
 typedef void ( *Tree_KeyDump )( TREE_KEY_TYPE key, FILE *handle );
 /*
  * Internal : indent tree node, used by dumpers.
- * Return initial indent  length.
+ * Return initial indent length.
  */
 size_t T_Indent( char *indent, int last, FILE *handle );
 

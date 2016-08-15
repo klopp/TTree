@@ -7,8 +7,8 @@
 #define HTABLE_H_
 
 #include <limits.h>
-#include "btree.h"
 #include "../klib/_lock.h"
+#include "avltree.h"
 
 /*
  * Hash table, based on Balanced Trees.
