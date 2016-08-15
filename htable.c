@@ -154,7 +154,7 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
     size_t i;
     int errors = 0;
 
-    for( i = 0; i < UCHAR_MAX; i++ ) {
+    for( i = 0; i <= UCHAR_MAX; i++ ) {
         if( ht->bt[i]->nodes ) {
             printf( "Tree idx: %zu, ", i );
             errors += AVL_dump( ht->bt[i], kdumper, ddumper, handle );
@@ -175,6 +175,7 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
         return HT_delete( ht, &key, sizeof(key) ); \
     }
 
+HT_INTEGER_IMPL( szt, size_t );
 HT_INTEGER_IMPL( char, char );
 HT_INTEGER_IMPL( uchar, unsigned char );
 HT_INTEGER_IMPL( short, short );
