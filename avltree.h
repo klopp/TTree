@@ -19,38 +19,38 @@ extern "C"
 {
 #endif
 
-typedef struct _BTNode {
+typedef struct _AVLNode {
     TREE_KEY_TYPE key;
     int height;
     void *data;
-    struct _BTNode *right;
-    struct _BTNode *left;
-} *BTNode;
+    struct _AVLNode *right;
+    struct _AVLNode *left;
+} *AVLNode;
 
-typedef void ( *BT_Walk )( BTNode node, void *data );
+typedef void ( *AVL_Walk )( AVLNode node, void *data );
 
-typedef struct _BTree {
+typedef struct _AVLTree {
     Tree_Flags flags;
     Tree_Destroy destructor;
     size_t nodes;
-    BTNode head;
+    AVLNode head;
     __lock_t( lock );
-} *BTree;
+} *AVLTree;
 
-BTree BT_create( Tree_Flags flags, Tree_Destroy destructor );
-void BT_clear( BTree tree );
-void BT_destroy( BTree tree );
+AVLTree AVL_create( Tree_Flags flags, Tree_Destroy destructor );
+void AVL_clear( AVLTree tree );
+void AVL_destroy( AVLTree tree );
 
-size_t BT_depth( BTree tree );
+size_t AVL_depth( AVLTree tree );
 
-BTNode BT_insert( BTree tree, TREE_KEY_TYPE key, void *data );
-int BT_delete( BTree tree, TREE_KEY_TYPE key );
-BTNode BT_search( BTree tree, TREE_KEY_TYPE key );
+AVLNode AVL_insert( AVLTree tree, TREE_KEY_TYPE key, void *data );
+int AVL_delete( AVLTree tree, TREE_KEY_TYPE key );
+AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key );
 
-void BT_walk( BTree tree, BT_Walk walker, void *data );
-void BT_walk_desc( BTree tree, BT_Walk walker, void *data );
-int BT_dump( BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
-             FILE *handle );
+void AVL_walk( AVLTree tree, AVL_Walk walker, void *data );
+void AVL_walk_desc( AVLTree tree, AVL_Walk walker, void *data );
+int AVL_dump( AVLTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+              FILE *handle );
 
 #ifdef __cplusplus
 }

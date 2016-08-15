@@ -35,12 +35,12 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
             /*
              * Always replace values (T_INSERT_REPLACE flag):
              */
-            ht->bt[i] = BT_create( flags | T_INSERT_REPLACE, destructor );
+            ht->bt[i] = AVL_create( flags | T_INSERT_REPLACE, destructor );
 
             if( !ht->bt[i] ) {
                 while( i ) {
                     i--;
-                    BT_destroy( ht->bt[i] );
+                    AVL_destroy( ht->bt[i] );
                 }
 
                 Free( ht );
@@ -61,7 +61,7 @@ void HT_clear( HTable ht )
     __lock( ht->lock );
 
     for( i = 0; i < UCHAR_MAX; i++ ) {
-        BT_clear( ht->bt[i] );
+        AVL_clear( ht->bt[i] );
     }
 
     __unlock( ht->lock );
@@ -73,7 +73,7 @@ void HT_destroy( HTable ht )
     __lock( ht->lock );
 
     for( i = 0; i < UCHAR_MAX; i++ ) {
-        BT_destroy( ht->bt[i] );
+        AVL_destroy( ht->bt[i] );
     }
 
     Free( ht );
@@ -97,10 +97,10 @@ size_t HT_size( HTable ht )
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
     unsigned int hash;
-    BTNode btn;
+    AVLNode btn;
     __lock( ht->lock );
     hash = ht->hf( key, key_size );
-    btn = BT_insert( ht->bt[hash & UCHAR_MAX], hash, data );
+    btn = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, data );
     __unlock( ht->lock );
     return btn ? hash : 0;
 }
@@ -112,9 +112,9 @@ void *HT_get( HTable ht, const void *key, size_t key_size )
 
 void *HT_get_k( HTable ht, unsigned int key )
 {
-    BTNode btn;
+    AVLNode btn;
     __lock( ht->lock );
-    btn = BT_search( ht->bt[key & UCHAR_MAX], key );
+    btn = AVL_search( ht->bt[key & UCHAR_MAX], key );
     __unlock( ht->lock );
     return btn ? btn->data : NULL;
 }
@@ -128,7 +128,7 @@ int HT_delete_k( HTable ht, unsigned int key )
 {
     int rc;
     __lock( ht->lock );
-    rc = BT_delete( ht->bt[key & UCHAR_MAX], key );
+    rc = AVL_delete( ht->bt[key & UCHAR_MAX], key );
     __unlock( ht->lock );
     return rc;
 }
@@ -156,7 +156,7 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 
     for( i = 0; i < UCHAR_MAX; i++ ) {
         if( ht->bt[i]->nodes ) {
-            errors += BT_dump( ht->bt[i], kdumper, ddumper, handle );
+            errors += AVL_dump( ht->bt[i], kdumper, ddumper, handle );
         }
     }
 

@@ -7,23 +7,23 @@
 
 #include "avltree.h"
 
-static int _BN_height( BTNode node )
+static int _BN_height( AVLNode node )
 {
     return node ? node->height : 0;
 }
 
 #define BN_bf( node ) _BN_height( (node)->right ) - _BN_height( (node)->left )
 
-static void _BN_seth( BTNode node )
+static void _BN_seth( AVLNode node )
 {
     int hl = _BN_height( node->left );
     int hr = _BN_height( node->right );
     node->height = ( hl > hr ? hl : hr ) + 1;
 }
 
-static BTNode _BN_rotr( BTNode x )
+static AVLNode _BN_rotr( AVLNode x )
 {
-    BTNode y = x->left;
+    AVLNode y = x->left;
     x->left = y->right;
     y->right = x;
     _BN_seth( x );
@@ -31,9 +31,9 @@ static BTNode _BN_rotr( BTNode x )
     return y;
 }
 
-static BTNode _BN_rotl( BTNode y )
+static AVLNode _BN_rotl( AVLNode y )
 {
-    BTNode x = y->right;
+    AVLNode x = y->right;
     y->right = x->left;
     x->left = y;
     _BN_seth( y );
@@ -41,7 +41,7 @@ static BTNode _BN_rotl( BTNode y )
     return x;
 }
 
-static BTNode _BN_balance( BTNode node )
+static AVLNode _BN_balance( AVLNode node )
 {
     _BN_seth( node );
 
@@ -64,7 +64,7 @@ static BTNode _BN_balance( BTNode node )
     return node;
 }
 
-static BTNode _BT_balance( BTNode node )
+static AVLNode _BT_balance( AVLNode node )
 {
     if( node->left ) {
         node->left = _BT_balance( node->left );
@@ -86,9 +86,9 @@ static BTNode _BT_balance( BTNode node )
  }
  */
 
-BTree BT_create( Tree_Flags flags, Tree_Destroy destructor )
+AVLTree AVL_create( Tree_Flags flags, Tree_Destroy destructor )
 {
-    BTree tree = Calloc( sizeof( struct _BTree ), 1 );
+    AVLTree tree = Calloc( sizeof( struct _AVLTree ), 1 );
 
     if( !tree ) {
         return NULL;
@@ -106,7 +106,7 @@ BTree BT_create( Tree_Flags flags, Tree_Destroy destructor )
     return tree;
 }
 
-static BTNode _BN_min( BTNode node )
+static AVLNode _BN_min( AVLNode node )
 {
     if( node->left ) {
         return _BN_min( node->left );
@@ -115,7 +115,7 @@ static BTNode _BN_min( BTNode node )
     return node;
 }
 
-static BTNode _BN_del_min( BTNode node )
+static AVLNode _BN_del_min( AVLNode node )
 {
     if( !node->left ) {
         return node->right;
@@ -125,12 +125,12 @@ static BTNode _BN_del_min( BTNode node )
     return _BN_balance( node );
 }
 
-static BTNode _BN_delete( BTree tree, BTNode *node, int key )
+static AVLNode _BN_delete( AVLTree tree, AVLNode *node, int key )
 {
     if( *node ) {
-        BTNode y = ( *node )->left;
-        BTNode z = ( *node )->right;
-        BTNode m;
+        AVLNode y = ( *node )->left;
+        AVLNode z = ( *node )->right;
+        AVLNode m;
 
         if( tree->destructor && ( *node )->data ) tree->destructor(
                 ( *node )->data );
@@ -152,7 +152,7 @@ static BTNode _BN_delete( BTree tree, BTNode *node, int key )
     return NULL;
 }
 
-static void _BT_clear( BTree tree, BTNode *node )
+static void _BT_clear( AVLTree tree, AVLNode *node )
 {
     if( *node ) {
         _BT_clear( tree, &( *node )->left );
@@ -167,7 +167,7 @@ static void _BT_clear( BTree tree, BTNode *node )
     }
 }
 
-void BT_clear( BTree tree )
+void AVL_clear( AVLTree tree )
 {
     if( tree ) {
         __lock( tree->lock );
@@ -176,7 +176,7 @@ void BT_clear( BTree tree )
     }
 }
 
-void BT_destroy( BTree tree )
+void AVL_destroy( AVLTree tree )
 {
     __lock( tree->lock );
     _BT_clear( tree, &tree->head );
@@ -184,7 +184,7 @@ void BT_destroy( BTree tree )
     Free( tree );
 }
 
-static BTNode *_BT_search( BTNode *node, int key )
+static AVLNode *_BT_search( AVLNode *node, int key )
 {
     if( key < ( *node )->key ) return
             ( *node )->left ? _BT_search( &( *node )->left, key ) : NULL;
@@ -195,11 +195,11 @@ static BTNode *_BT_search( BTNode *node, int key )
     return node;
 }
 
-BTNode BT_search( BTree tree, TREE_KEY_TYPE key )
+AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
-        BTNode *node = _BT_search( &tree->head, key );
+        AVLNode *node = _BT_search( &tree->head, key );
         __unlock( tree->lock );
 
         if( node ) {
@@ -210,11 +210,11 @@ BTNode BT_search( BTree tree, TREE_KEY_TYPE key )
     return NULL;
 }
 
-int BT_delete( BTree tree, TREE_KEY_TYPE key )
+int AVL_delete( AVLTree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
-        BTNode *node = _BT_search( &tree->head, key );
+        AVLNode *node = _BT_search( &tree->head, key );
 
         if( node ) {
             *node = _BN_delete( tree, node, key );
@@ -227,11 +227,11 @@ int BT_delete( BTree tree, TREE_KEY_TYPE key )
     return 0;
 }
 
-static BTNode _BT_insert( BTree tree, BTNode node, int key, void *data,
-                          size_t depth )
+static AVLNode _BT_insert( AVLTree tree, AVLNode node, int key, void *data,
+                           size_t depth )
 {
     if( !node ) {
-        node = Calloc( sizeof( struct _BTNode ), 1 );
+        node = Calloc( sizeof( struct _AVLNode ), 1 );
 
         if( !node ) {
             return NULL;
@@ -244,7 +244,7 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void *data,
     }
 
     if( key < node->key ) {
-        BTNode n = _BT_insert( tree, node->left, key, data, depth + 1 );
+        AVLNode n = _BT_insert( tree, node->left, key, data, depth + 1 );
 
         if( n ) {
             node->left = n;
@@ -254,7 +254,7 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void *data,
         }
     }
     else if( key > node->key ) {
-        BTNode n = _BT_insert( tree, node->right, key, data, depth + 1 );
+        AVLNode n = _BT_insert( tree, node->right, key, data, depth + 1 );
 
         if( n ) {
             node->right = n;
@@ -283,14 +283,14 @@ static BTNode _BT_insert( BTree tree, BTNode node, int key, void *data,
     return _BN_balance( node );
 }
 
-BTNode BT_insert( BTree tree, TREE_KEY_TYPE key, void *data )
+AVLNode AVL_insert( AVLTree tree, TREE_KEY_TYPE key, void *data )
 {
     if( !tree ) {
         return NULL;
     }
 
     __lock( tree->lock );
-    BTNode node = _BT_insert( tree, tree->head, key, data, 0 );
+    AVLNode node = _BT_insert( tree, tree->head, key, data, 0 );
 
     if( node ) {
         tree->nodes++;
@@ -301,25 +301,25 @@ BTNode BT_insert( BTree tree, TREE_KEY_TYPE key, void *data )
     return node;
 }
 
-static void _BT_walk_asc( void *node, BT_Walk walker, void *data )
+static void _BT_walk_asc( void *node, AVL_Walk walker, void *data )
 {
     if( node ) {
-        _BT_walk_asc( ( ( BTNode )node )->left, walker, data );
+        _BT_walk_asc( ( ( AVLNode )node )->left, walker, data );
         walker( node, data );
-        _BT_walk_asc( ( ( BTNode )node )->right, walker, data );
+        _BT_walk_asc( ( ( AVLNode )node )->right, walker, data );
     }
 }
 
-static void _BT_walk_desc( void *node, BT_Walk walker, void *data )
+static void _BT_walk_desc( void *node, AVL_Walk walker, void *data )
 {
     if( node ) {
-        _BT_walk_desc( ( ( BTNode )node )->right, walker, data );
+        _BT_walk_desc( ( ( AVLNode )node )->right, walker, data );
         walker( node, data );
-        _BT_walk_desc( ( ( BTNode )node )->left, walker, data );
+        _BT_walk_desc( ( ( AVLNode )node )->left, walker, data );
     }
 }
 
-void BT_walk( BTree tree, BT_Walk walker, void *data )
+void AVL_walk( AVLTree tree, AVL_Walk walker, void *data )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -328,7 +328,7 @@ void BT_walk( BTree tree, BT_Walk walker, void *data )
     }
 }
 
-void BT_walk_desc( BTree tree, BT_Walk walker, void *data )
+void AVL_walk_desc( AVLTree tree, AVL_Walk walker, void *data )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -337,7 +337,7 @@ void BT_walk_desc( BTree tree, BT_Walk walker, void *data )
     }
 }
 
-static void _BT_dump( BTNode node, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+static void _BT_dump( AVLNode node, Tree_KeyDump kdumper, Tree_DataDump ddumper,
                       char *indent, int last,
                       FILE *handle )
 {
@@ -368,7 +368,7 @@ static void _BT_dump( BTNode node, Tree_KeyDump kdumper, Tree_DataDump ddumper,
     }
 }
 
-static size_t _BT_depth( BTNode node, size_t depth )
+static size_t _BT_depth( AVLNode node, size_t depth )
 {
     size_t left, right;
 
@@ -381,7 +381,7 @@ static size_t _BT_depth( BTNode node, size_t depth )
     return left > right ? left : right;
 }
 
-size_t BT_depth( BTree tree )
+size_t AVL_depth( AVLTree tree )
 {
     size_t rc;
     __lock( tree->lock );
@@ -390,10 +390,10 @@ size_t BT_depth( BTree tree )
     return rc;
 }
 
-int BT_dump( BTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
-             FILE *handle )
+int AVL_dump( AVLTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+              FILE *handle )
 {
-    size_t depth = BT_depth( tree );
+    size_t depth = AVL_depth( tree );
     char *buf = Calloc( depth + 1, 2 );
 
     if( buf ) {
