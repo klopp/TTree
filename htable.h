@@ -76,9 +76,9 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
  * ... etc
  */
 #define HT_INTEGER_DECL(tag, type) \
-        unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
-        void *HT_get_##tag( HTable ht, type key); \
-        int HT_delete_##tag( HTable ht, type key);
+    unsigned int HT_set_##tag( HTable ht, type key, void *data ); \
+    void *HT_get_##tag( HTable ht, type key); \
+    int HT_delete_##tag( HTable ht, type key);
 
 HT_INTEGER_DECL( char, char );
 HT_INTEGER_DECL( uchar, unsigned char );
