@@ -1,5 +1,5 @@
 /*
- * tstree.h, part of "ttree" project.
+ * tstree.h, part of "trees" project.
  *
  *  Created on: 16.05.2015, 21:25
  *      Author: Vsevolod Lutovinov <klopp@yandex.ru>
@@ -20,11 +20,11 @@ extern "C"
  *  (sorted by key) wich must be freed with free(), or NULL. Last element of
  *  returned array is NULL.
  */
-char **TS_data(TTree tree, size_t *count);
-char **TS_lookup(TTree tree, const char *prefix, size_t *count);
-char **TS_nlookup(TTree tree, const char *prefix, size_t max,
-                  size_t *count);
-int TS_dump(TTree tree, FILE *handle);
+char **TS_data( TTree tree, size_t *count );
+char **TS_lookup( TTree tree, const char *prefix, size_t *count );
+char **TS_nlookup( TTree tree, const char *prefix, size_t max,
+                   size_t *count );
+int TS_dump( TTree tree, FILE *handle );
 
 /*
  *  String tree shortcuts (with NULL data field)

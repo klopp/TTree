@@ -1,5 +1,5 @@
 /*
- * ttree.c, part of "ttree" project
+ * ttree.c, part of "trees" project
  *
  *  Created on: 10.05.2015
  *  Author: Vsevolod Lutovinov <klopp@yandex.ru>

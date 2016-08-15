@@ -1,5 +1,5 @@
 /*
- * btree.h, part of "ttree" project.
+ * avltree.h, part of "trees" project.
  *
  *  Created on: 09.06.2015, 02:21
  *      Author: Vsevolod Lutovinov <klopp@yandex.ru>

@@ -1,5 +1,5 @@
 /*
- * tstree.c, part of "ttree" project.
+ * tstree.c, part of "trees" project.
  *
  *  Created on: 16.05.2015, 21:27
  *      Author: Vsevolod Lutovinov <klopp@yandex.ru>
