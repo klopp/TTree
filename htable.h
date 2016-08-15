@@ -34,7 +34,7 @@ HT_Hash_Functions;
 typedef unsigned int ( *HT_Hash_Function )( const void *data, size_t size );
 
 typedef struct _HTable {
-    AVLTree bt[UCHAR_MAX];
+    AVLTree bt[UCHAR_MAX + 1];
     HT_Hash_Function hf;
     __lock_t( lock );
 } *HTable;

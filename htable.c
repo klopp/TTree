@@ -22,7 +22,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
 {
     HTable ht = NULL;
 
-    if( hf <= HF_HASH_MAX ) {
+    if( hf >= HF_HASH_MAX ) {
         hf = 0;
     }
 
@@ -31,7 +31,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Flags flags,
     if( ht ) {
         size_t i;
 
-        for( i = 0; i < UCHAR_MAX; i++ ) {
+        for( i = 0; i <= UCHAR_MAX; i++ ) {
             /*
              * Always replace values (T_INSERT_REPLACE flag):
              */
@@ -60,7 +60,7 @@ void HT_clear( HTable ht )
     size_t i;
     __lock( ht->lock );
 
-    for( i = 0; i < UCHAR_MAX; i++ ) {
+    for( i = 0; i <= UCHAR_MAX; i++ ) {
         AVL_clear( ht->bt[i] );
     }
 
@@ -72,7 +72,7 @@ void HT_destroy( HTable ht )
     size_t i;
     __lock( ht->lock );
 
-    for( i = 0; i < UCHAR_MAX; i++ ) {
+    for( i = 0; i <= UCHAR_MAX; i++ ) {
         AVL_destroy( ht->bt[i] );
     }
 
@@ -97,12 +97,12 @@ size_t HT_size( HTable ht )
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
     unsigned int hash;
-    AVLNode btn;
+    AVLNode node;
     __lock( ht->lock );
     hash = ht->hf( key, key_size );
-    btn = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, data );
+    node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, data );
     __unlock( ht->lock );
-    return btn ? hash : 0;
+    return node ? hash : 0;
 }
 
 void *HT_get( HTable ht, const void *key, size_t key_size )
@@ -140,12 +140,12 @@ unsigned int HT_set_c( HTable ht, const char *key, void *data )
 
 void *HT_get_c( HTable ht, const char *key )
 {
-    return HT_get( ht, key, strlen( key ) );
+    return HT_get_k( ht, ht->hf( key, strlen( key ) ) );
 }
 
 int HT_delete_c( HTable ht, const char *key )
 {
-    return HT_delete( ht, key, strlen( key ) );
+    return HT_delete_k( ht, ht->hf( key, strlen( key ) ) );
 }
 
 int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
@@ -156,6 +156,7 @@ int HT_dump( HTable ht, Tree_KeyDump kdumper, Tree_DataDump ddumper,
 
     for( i = 0; i < UCHAR_MAX; i++ ) {
         if( ht->bt[i]->nodes ) {
+            printf( "Tree idx: %zu, ", i );
             errors += AVL_dump( ht->bt[i], kdumper, ddumper, handle );
         }
     }
