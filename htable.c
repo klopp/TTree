@@ -133,6 +133,26 @@ size_t HT_size( HTable ht )
     return rc;
 }
 
+size_t HT_maxdepth( HTable ht )
+{
+    size_t maxdepth = 0;
+    size_t i = 0;
+    __lock( ht->lock );
+
+    while( i < UCHAR_MAX ) {
+        size_t depth = AVL_depth( ht->bt[i] );
+
+        if( maxdepth < depth ) {
+            maxdepth = depth;
+        }
+
+        i++;
+    }
+
+    __unlock( ht->lock );
+    return maxdepth;
+}
+
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
 {
     unsigned int hash;
@@ -162,13 +182,30 @@ unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data )
     e->data = data;
     e->next = NULL;
     hash = ht->hf( key, key_size );
+    /*
+        node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
+
+        if( !node ) {
+            node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
+            ht->error = ht->bt[hash & UCHAR_MAX]->error;
+            __unlock( ht->lock );
+            return node ? hash : 0;
+        }
+    */
+    node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
+    ht->error = ht->bt[hash & UCHAR_MAX]->error;
+
+    if( node || ht->error != TE_FOUND ) {
+        __unlock( ht->lock );
+        return node ? hash : 0;
+    }
+
     node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
 
     if( !node ) {
-        node = AVL_insert( ht->bt[hash & UCHAR_MAX], hash, e );
         ht->error = ht->bt[hash & UCHAR_MAX]->error;
         __unlock( ht->lock );
-        return node ? hash : 0;
+        return 0;
     }
 
     cursor = node->data;
