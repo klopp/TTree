@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 /*
- * Common tree
+ * Common tree stuff
  */
 
 #ifdef __cplusplus
