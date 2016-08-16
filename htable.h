@@ -35,14 +35,16 @@ HT_Hash_Functions;
 typedef unsigned int ( *HT_Hash_Function )( const void *data, size_t size );
 
 typedef struct _HTable {
-    AVLTree bt[UCHAR_MAX + 1];
+    /*AVLTree bt[UCHAR_MAX + 1];*/
+    AVLTree *bt;
+    size_t size;
     HT_Hash_Function hf;
     Tree_Error error;
     Tree_Destroy destructor;
     __lock_t( lock );
 } *HTable;
 
-HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor );
+HTable HT_create( HT_Hash_Functions hf, size_t size, Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 size_t HT_size( HTable ht );
