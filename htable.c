@@ -243,19 +243,59 @@ int HT_delete( HTable ht, const void *key, size_t key_size )
     int rc = 0;
     AVLNode node;
     unsigned int hash;
+    HTElem e;
     __lock( ht->lock );
     hash = ht->hf( key, key_size );
     node = AVL_search( ht->bt[hash & UCHAR_MAX], hash );
 
     if( node ) {
-        if( ht->destructor ) {
-            ht->destructor( ( ( HTElem ) node->data )->data );
-        }
+        e = node->data;
 
-        rc = AVL_delete( ht->bt[hash & UCHAR_MAX], hash );
+        if( !e->next ) {
+            if( ht->destructor ) {
+                ht->destructor( e->data );
+            }
+
+            Free( e->key );
+            Free( e );
+            rc = AVL_delete( ht->bt[hash & UCHAR_MAX], hash );
+            ht->error = ht->bt[hash & UCHAR_MAX]->error;
+        }
+        else {
+            HTElem cursor = e;
+
+            while( cursor ) {
+                if( cursor->key_size == key_size && !memcmp( cursor->key, key, key_size ) ) {
+                    /*
+                     * First element:
+                     */
+                    if( e == node->data ) {
+                        node->data = e->next;
+                    }
+                    else {
+                        e->next = cursor->next;
+                    }
+
+                    if( ht->destructor ) {
+                        ht->destructor( cursor->data );
+                    }
+
+                    Free( cursor->key );
+                    Free( cursor );
+                    rc = 1;
+                    break;
+                }
+
+                e = cursor;
+                cursor = cursor->next;
+            }
+
+            if( !cursor ) {
+                ht->error = TE_NOT_FOUND;
+            }
+        }
     }
 
-    ht->error = ht->bt[hash & UCHAR_MAX]->error;
     __unlock( ht->lock );
     return rc;
 }
