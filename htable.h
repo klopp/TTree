@@ -46,6 +46,7 @@ HTable HT_create( HT_Hash_Functions hf, Tree_Destroy destructor );
 void HT_clear( HTable ht );
 void HT_destroy( HTable ht );
 size_t HT_size( HTable ht );
+size_t HT_maxdepth( HTable ht );
 
 /*
  * HT_set() return internal key value:
@@ -53,13 +54,6 @@ size_t HT_size( HTable ht );
 unsigned int HT_set( HTable ht, const void *key, size_t key_size, void *data );
 void *HT_get( HTable ht, const void *key, size_t key_size );
 int HT_delete( HTable ht, const void *key, size_t key_size );
-/*
- * HT_get_k() and HT_delete_k() uses internal key values (see HT_set() return, faster):
- */
-/*
-void *HT_get_k( HTable ht, unsigned int key );
-int HT_delete_k( HTable ht, unsigned int key );
-*/
 
 /*
  * C-strings keys handling:
