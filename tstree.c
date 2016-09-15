@@ -8,19 +8,20 @@
 #include "tstree.h"
 
 TTNode __TT_lookup( TTNode node, const char *s, Tree_Flags flags );
-void _TS_data( TTNode node, void *data );
-void _TT_walk_asc( TTNode node, TT_Walk walker, void *data );
+void _TS_data( TTNodeConst node, void *data );
+void _TT_walk_asc( TTNodeConst node, TT_Walk walker, void *data );
 TT_Data _TT_lookup( TTree tree, const char *prefix, size_t max,
                     size_t *count );
 
-static char **_TS_lookup( TTree tree, const char *prefix, size_t max,
-                          size_t *count )
+static char const **_TS_lookup( const TTree tree, const char *prefix,
+                                size_t max,
+                                size_t *count )
 {
     TTNode node;
     struct {
         size_t max;
         size_t idx;
-        char **data;
+        char const **data;
     } data =
     { 0 };
 
@@ -58,24 +59,24 @@ static char **_TS_lookup( TTree tree, const char *prefix, size_t max,
     return data.data;
 }
 
-TT_Data TT_lookup( TTree tree, const char *prefix, size_t *count )
+TT_DataConst TT_lookup( const TTree tree, const char *prefix, size_t *count )
 {
     return _TT_lookup( tree, prefix, 0, count );
 }
 
-TT_Data TT_nlookup( TTree tree, const char *prefix, size_t max,
-                    size_t *count )
+TT_DataConst TT_nlookup( const TTree tree, const char *prefix, size_t max,
+                         size_t *count )
 {
     return _TT_lookup( tree, prefix, max, count );
 }
 
-char **TS_lookup( TTree tree, const char *prefix, size_t *count )
+char const **TS_lookup( const TTree tree, const char *prefix, size_t *count )
 {
     return _TS_lookup( tree, prefix, 0, count );
 }
 
-char **TS_nlookup( TTree tree, const char *prefix, size_t max,
-                   size_t *count )
+char const **TS_nlookup( const TTree tree, const char *prefix, size_t max,
+                         size_t *count )
 {
     return _TS_lookup( tree, prefix, max, count );
 }
@@ -85,7 +86,7 @@ static void _TS_Dump( void *data, FILE *handle )
     fprintf( handle, " ''%s''", ( char * )data );
 }
 
-int TS_dump( TTree tree, FILE *handle )
+int TS_dump( const TTree tree, FILE *handle )
 {
     return TT_dump( tree, _TS_Dump, handle );
 }

@@ -20,6 +20,8 @@ typedef struct _TT_Data {
     void *data;
 } *TT_Data;
 
+typedef struct _TT_Data const *TT_DataConst;
+
 typedef struct _TTNode {
     char splitter;
     char *key;
@@ -68,9 +70,9 @@ TTNodeConst TT_search( const TTree tree, const char *key );
  *  returned array is { NULL, NULL }. Set 'count' to array length if
  *  'count' is not NULL.
  */
-TT_Data TT_lookup( const TTree tree, const char *prefix, size_t *count );
-TT_Data TT_nlookup( const TTree tree, const char *prefix, size_t max,
-                    size_t *count );
+TT_DataConst TT_lookup( const TTree tree, const char *prefix, size_t *count );
+TT_DataConst TT_nlookup( const TTree tree, const char *prefix, size_t max,
+                         size_t *count );
 /*
  *  Lookup nodes with key started by prefix in new tree. Field 'destructor' in
  *  new tree is NULL.
@@ -95,7 +97,7 @@ size_t TT_depth( const TTree tree );
  *  key) wich must be freed with free(), or NULL. Last element of returned
  *  array is { NULL, NULL }.
  */
-TT_Data TT_data( const TTree tree, size_t *count );
+TT_DataConst TT_data( const TTree tree, size_t *count );
 
 /*
  *  Tree walking and dumping stuff.

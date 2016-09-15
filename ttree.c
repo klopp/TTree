@@ -374,7 +374,7 @@ static void _TT_data( TTNodeConst node, void *data )
     }
 }
 
-TT_Data TT_data( const TTree tree, size_t *count )
+TT_DataConst TT_data( const TTree tree, size_t *count )
 {
     struct {
         size_t max;
