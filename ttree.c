@@ -94,46 +94,12 @@ void TT_destroy( TTree tree )
     memset( tree, 0, sizeof( struct _TernaryTree ) );
     Free( tree );
 }
-void TT_clear( TTree tree )
+void TT_clear( const TTree tree )
 {
     __lock( tree->lock );
     _TT_destroy( tree->head->mid, tree, 1 );
     tree->head->mid = NULL;
     __unlock( tree->lock );
-}
-int TT_del_node( TTree tree, const char *key )
-{
-    TTNode node = TT_search( tree, key );
-
-    if( node ) {
-        __lock( tree->lock );
-        _TT_destroy( node, tree, 0 );
-        __unlock( tree->lock );
-        return 1;
-    }
-
-    return 0;
-}
-int TT_del_key( TTree tree, const char *key )
-{
-    TTNode node = TT_search( tree, key );
-
-    if( node ) {
-        __lock( tree->lock );
-
-        if( node->data && tree->destructor ) {
-            tree->destructor( node->data );
-        }
-
-        node->data = NULL;
-        Free( node->key );
-        tree->keys--;
-        node->key = NULL;
-        __unlock( tree->lock );
-        return 1;
-    }
-
-    return 0;
 }
 
 /*
@@ -164,7 +130,55 @@ static TTNode _TT_search( TTNode node, const char *s, Tree_Flags flags )
     return ( ptr && ptr->key ) ? ptr : NULL;
 }
 
-TTNode TT_search( TTree tree, const char *s )
+
+int TT_del_node( const TTree tree, const char *key )
+{
+    TTNode node;
+
+    if( !tree || !tree->head || !key || !*key ) {
+        return 0;
+    }
+
+    node = _TT_search( tree->head->mid, key, tree->flags );
+
+    if( node ) {
+        __lock( tree->lock );
+        _TT_destroy( node, tree, 0 );
+        __unlock( tree->lock );
+        return 1;
+    }
+
+    return 0;
+}
+int TT_del_key( const TTree tree, const char *key )
+{
+    TTNode node;
+
+    if( !tree || !tree->head || !key || !*key ) {
+        return 0;
+    }
+
+    node = _TT_search( tree->head->mid, key, tree->flags );
+
+    if( node ) {
+        __lock( tree->lock );
+
+        if( node->data && tree->destructor ) {
+            tree->destructor( node->data );
+        }
+
+        node->data = NULL;
+        Free( node->key );
+        tree->keys--;
+        node->key = NULL;
+        __unlock( tree->lock );
+        return 1;
+    }
+
+    return 0;
+}
+
+TTNodeConst TT_search( const TTree tree, const char *s )
 {
     TTNode node;
 
@@ -241,7 +255,7 @@ static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void *data,
 
     return node;
 }
-TTNode TT_insert( TTree tree, const char *s, void *data )
+TTNodeConst TT_insert( const TTree tree, const char *s, void *data )
 {
     TTNode node;
 
@@ -266,7 +280,7 @@ TTNode TT_insert( TTree tree, const char *s, void *data )
 /*
  *  Tree walking stuff:
  */
-static void _TT_walk( TTNode node, TT_Walk walker, void *data )
+static void _TT_walk( TTNodeConst node, TT_Walk walker, void *data )
 {
     if( node ) {
         _TT_walk( node->left, walker, data );
@@ -275,7 +289,7 @@ static void _TT_walk( TTNode node, TT_Walk walker, void *data )
         walker( node, data );
     }
 }
-void _TT_walk_asc( TTNode node, TT_Walk walker, void *data )
+void _TT_walk_asc( TTNodeConst node, TT_Walk walker, void *data )
 {
     if( node ) {
         //        walker( node, data );
@@ -285,7 +299,7 @@ void _TT_walk_asc( TTNode node, TT_Walk walker, void *data )
         _TT_walk_asc( node->right, walker, data );
     }
 }
-static void _TT_walk_desc( TTNode node, TT_Walk walker, void *data )
+static void _TT_walk_desc( TTNodeConst node, TT_Walk walker, void *data )
 {
     if( node ) {
         _TT_walk_desc( node->right, walker, data );
@@ -295,7 +309,7 @@ static void _TT_walk_desc( TTNode node, TT_Walk walker, void *data )
         //        walker( node, data );
     }
 }
-void TT_walk( TTree tree, TT_Walk walker, void *data )
+void TT_walk( const TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
         __lock( tree->lock );
@@ -303,7 +317,7 @@ void TT_walk( TTree tree, TT_Walk walker, void *data )
         __unlock( tree->lock );
     }
 }
-void TT_walk_asc( TTree tree, TT_Walk walker, void *data )
+void TT_walk_asc( const TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
         __lock( tree->lock );
@@ -311,7 +325,7 @@ void TT_walk_asc( TTree tree, TT_Walk walker, void *data )
         __unlock( tree->lock );
     }
 }
-void TT_walk_desc( TTree tree, TT_Walk walker, void *data )
+void TT_walk_desc( const TTree tree, TT_Walk walker, void *data )
 {
     if( tree ) {
         __lock( tree->lock );
@@ -323,13 +337,13 @@ void TT_walk_desc( TTree tree, TT_Walk walker, void *data )
 /*
  *  Tree information stuff, get depth:
  */
-static void _TT_depth( TTNode node, void *data )
+static void _TT_depth( TTNodeConst node, void *data )
 {
     if( node->depth > *( size_t * )data ) {
         ( *( size_t * )data ) = node->depth;
     }
 }
-size_t TT_depth( TTree tree )
+size_t TT_depth( const TTree tree )
 {
     size_t max = 0;
 
@@ -343,7 +357,7 @@ size_t TT_depth( TTree tree )
 /*
  *  Get sorted data from tree:
  */
-static void _TT_data( TTNode node, void *data )
+static void _TT_data( TTNodeConst node, void *data )
 {
     if( node->key ) {
         struct {
@@ -360,7 +374,7 @@ static void _TT_data( TTNode node, void *data )
     }
 }
 
-TT_Data TT_data( TTree tree, size_t *count )
+TT_Data TT_data( const TTree tree, size_t *count )
 {
     struct {
         size_t max;
@@ -393,7 +407,7 @@ TT_Data TT_data( TTree tree, size_t *count )
     return data.data;
 }
 
-void _TS_data( TTNode node, void *data )
+void _TS_data( TTNodeConst node, void *data )
 {
     if( node->key ) {
         struct {
@@ -408,7 +422,7 @@ void _TS_data( TTNode node, void *data )
         }
     }
 }
-char **TS_data( TTree tree, size_t *count )
+char **TS_data( const TTree tree, size_t *count )
 {
     struct {
         size_t max;
@@ -444,7 +458,8 @@ char **TS_data( TTree tree, size_t *count )
 /*
  *  Dump tree stuff:
  */
-static void _TT_dump( TTNode node, Tree_DataDump dumper, char *indent, int last,
+static void _TT_dump( const TTNode node, Tree_DataDump dumper, char *indent,
+                      int last,
                       FILE *handle )
 {
     size_t strip = 0;
