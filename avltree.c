@@ -193,7 +193,7 @@ static AVLNode *_AVL_search( AVLNode *node, TREE_KEY_TYPE key )
     return node;
 }
 
-AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key )
+AVLNodeConst AVL_search( const AVLTree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -211,7 +211,7 @@ AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key )
     return NULL;
 }
 
-int AVL_delete( AVLTree tree, TREE_KEY_TYPE key )
+int AVL_delete( const AVLTree tree, TREE_KEY_TYPE key )
 {
     int rc = 0;
 
@@ -294,7 +294,7 @@ static AVLNode _AVL_insert( AVLTree tree, AVLNode node, TREE_KEY_TYPE key,
     return _AVL_balance( node );
 }
 
-AVLNode AVL_insert( AVLTree tree, TREE_KEY_TYPE key, void *data )
+AVLNodeConst AVL_insert( const AVLTree tree, TREE_KEY_TYPE key, void *data )
 {
     AVLNode node = NULL;
 
@@ -332,7 +332,7 @@ static void _AVL_walk_desc( void *node, AVL_Walk walker, void *data )
     }
 }
 
-void AVL_walk( AVLTree tree, AVL_Walk walker, void *data )
+void AVL_walk( const AVLTree tree, AVL_Walk walker, void *data )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -341,7 +341,7 @@ void AVL_walk( AVLTree tree, AVL_Walk walker, void *data )
     }
 }
 
-void AVL_walk_desc( AVLTree tree, AVL_Walk walker, void *data )
+void AVL_walk_desc( const AVLTree tree, AVL_Walk walker, void *data )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -395,7 +395,7 @@ static size_t _AVL_depth( AVLNode node, size_t depth )
     return left > right ? left : right;
 }
 
-size_t AVL_depth( AVLTree tree )
+size_t AVL_depth( const AVLTree tree )
 {
     size_t rc;
     __lock( tree->lock );

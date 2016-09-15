@@ -27,7 +27,9 @@ typedef struct _AVLNode {
     struct _AVLNode *left;
 } *AVLNode;
 
-typedef void ( *AVL_Walk )( AVLNode node, void *data );
+typedef struct _AVLNode const *AVLNodeConst;
+
+typedef void ( *AVL_Walk )( const AVLNodeConst node, void *data );
 
 typedef struct _AVLTree {
     Tree_Flags flags;
@@ -42,15 +44,15 @@ AVLTree AVL_create( Tree_Flags flags, Tree_Destroy destructor );
 void AVL_clear( AVLTree tree );
 void AVL_destroy( AVLTree tree );
 
-size_t AVL_depth( AVLTree tree );
+size_t AVL_depth( const AVLTree tree );
 
-AVLNode AVL_insert( AVLTree tree, TREE_KEY_TYPE key, void *data );
-int AVL_delete( AVLTree tree, TREE_KEY_TYPE key );
-AVLNode AVL_search( AVLTree tree, TREE_KEY_TYPE key );
+AVLNodeConst AVL_insert( const AVLTree tree, TREE_KEY_TYPE key, void *data );
+int AVL_delete( const AVLTree tree, TREE_KEY_TYPE key );
+AVLNodeConst  AVL_search( AVLTree tree, TREE_KEY_TYPE key );
 
-void AVL_walk( AVLTree tree, AVL_Walk walker, void *data );
-void AVL_walk_desc( AVLTree tree, AVL_Walk walker, void *data );
-int AVL_dump( AVLTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+void AVL_walk( const AVLTree tree, AVL_Walk walker, void *data );
+void AVL_walk_desc( const AVLTree tree, AVL_Walk walker, void *data );
+int AVL_dump( const AVLTree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
               FILE *handle );
 
 #ifdef __cplusplus
