@@ -116,7 +116,7 @@ static STNode _ST_insert( STree tree, STNode *node, TREE_KEY_TYPE key,
     return NULL;
 }
 
-STNode ST_insert( STree tree, TREE_KEY_TYPE key, void *data )
+STNodeConst ST_insert( const STree tree, TREE_KEY_TYPE key, void *data )
 {
     if( !tree ) {
         return NULL;
@@ -241,7 +241,7 @@ static STNode *_ST_search( STNode *node, TREE_KEY_TYPE key )
     return node;
 }
 
-STNode ST_search( STree tree, TREE_KEY_TYPE key )
+STNodeConst ST_search( const STree tree, TREE_KEY_TYPE key )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -256,7 +256,7 @@ STNode ST_search( STree tree, TREE_KEY_TYPE key )
     return NULL;
 }
 
-static size_t _ST_depth( STNode node, size_t depth )
+static size_t _ST_depth( const STNode node, size_t depth )
 {
     size_t left, right;
 
@@ -315,7 +315,7 @@ size_t ST_depth( STree tree )
  }
  */
 
-int ST_delete( STree tree, TREE_KEY_TYPE key )
+int ST_delete( const STree tree, TREE_KEY_TYPE key )
 {
     int rc = 0;
     __lock( tree->lock );
@@ -359,7 +359,7 @@ static void _ST_walk( STNode node, ST_Walk walker, void *data )
     }
 }
 
-void ST_walk( STree tree, ST_Walk walker, void *data )
+void ST_walk( const STree tree, ST_Walk walker, void *data )
 {
     if( tree && tree->head ) {
         __lock( tree->lock );
@@ -400,7 +400,7 @@ static void _ST_dump( STNode node, Tree_KeyDump kdumper, Tree_DataDump ddumper,
     }
 }
 
-int ST_dump( STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+int ST_dump( const STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
              FILE *handle )
 {
     if( tree && tree->head ) {

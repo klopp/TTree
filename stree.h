@@ -26,7 +26,9 @@ typedef struct _STNode {
     struct _STNode *right;
 } *STNode;
 
-typedef void ( *ST_Walk )( STNode node, void *data );
+typedef struct _STNode const *STNodeConst;
+
+typedef void ( *ST_Walk )( STNodeConst node, void *data );
 
 typedef struct _STree {
     Tree_Flags flags;
@@ -42,12 +44,12 @@ void ST_destroy( STree tree );
 
 size_t ST_depth( STree tree );
 
-STNode ST_insert( STree tree, TREE_KEY_TYPE key, void *data );
-int ST_delete( STree tree, TREE_KEY_TYPE key );
-STNode ST_search( STree tree, TREE_KEY_TYPE key );
+STNodeConst ST_insert( const STree tree, TREE_KEY_TYPE key, void *data );
+int ST_delete( const STree tree, TREE_KEY_TYPE key );
+STNodeConst ST_search( const STree tree, TREE_KEY_TYPE key );
 
-void ST_walk( STree tree, ST_Walk walker, void *data );
-int ST_dump( STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
+void ST_walk( const STree tree, ST_Walk walker, void *data );
+int ST_dump( const STree tree, Tree_KeyDump kdumper, Tree_DataDump ddumper,
              FILE *handle );
 
 #ifdef __cplusplus
