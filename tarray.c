@@ -9,16 +9,19 @@
 
 TArray TA_create( Tree_Flags flags, Tree_Destroy destructor )
 {
-    TArray array = Malloc( sizeof(struct _TArray) );
+    TArray array = Malloc( sizeof( struct _TArray ) );
+
     if( array ) {
         array->tree = AVL_create( flags | T_INSERT_REPLACE, destructor );
         array->length = 0;
         array->error = 0;
+
         if( !array->tree ) {
             Free( array );
             array = NULL;
         }
     }
+
     return array;
 };
 
@@ -35,25 +38,53 @@ void TA_destroy( TArray array )
     Free( array );
 };
 
-AVLNodeConst TA_set( TArray array, size_t idx, void * data )
+AVLNodeConst TA_set( TArray array, size_t idx, void *data )
 {
+    array->error = 0;
+
+    if( idx >= array->length ) {
+        array->length = idx + 1;
+    }
+
     return AVL_insert( array->tree, idx, data );
 };
 
-void * TA_get( TArray array, size_t idx )
+int TA_del( TArray array, size_t idx )
 {
-    if( idx < array->length )
-    {
+    array->error = 0;
+
+    if( idx < array->length ) {
+        if( !AVL_delete( array->tree, idx ) ) {
+            array->error = ENOENT;
+        }
+        else if( idx == array->length - 1 ) {
+            --array->length;
+        }
+    }
+    else {
+        array->error = ERANGE;
+    }
+
+    return array->error;
+}
+
+void *TA_get( TArray array, size_t idx )
+{
+    array->error = 0;
+
+    if( idx < array->length ) {
         AVLNodeConst node = AVL_search( array->tree, idx );
+
         if( node ) {
             return node->data;
         }
+
         array->error = ENOENT;
     }
-    else
-    {
+    else {
         array->error = ERANGE;
     }
+
     return NULL;
 };
 

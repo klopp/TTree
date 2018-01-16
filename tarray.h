@@ -19,23 +19,23 @@ extern "C"
 {
 #endif
 
-typedef struct _TArray
-{
+typedef struct _TArray {
     AVLTree tree;
     int error;
     size_t length;
-}*TArray;
+} *TArray;
 
 TArray TA_create( Tree_Flags flags, Tree_Destroy destructor );
 void TA_clear( TArray array );
 void TA_destroy( TArray array );
 
-AVLNodeConst TA_set( TArray array, size_t idx, void * data );
+AVLNodeConst TA_set( TArray array, size_t idx, void *data );
 
 /*
- * Set array->error to 0, ENOENT or ERANGE
+ * Sets array->error to 0, ENOENT or ERANGE
  */
-void * TA_get( TArray array, size_t idx );
+int TA_del( TArray array, size_t idx );
+void *TA_get( TArray array, size_t idx );
 
 #ifdef __cplusplus
 };
