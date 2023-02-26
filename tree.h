@@ -50,7 +50,8 @@ typedef enum _Tree_Flags
      * Without - link to created/replaced node.
      */
     T_INSERT_FAST = 2096,
-    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE | T_FREE_DEFAULT )
+    T_DEFAULT_FLAGS = ( T_INSERT_REPLACE | T_FREE_DEFAULT ),
+    T_NO_FLAGS = 0
 }
 Tree_Flags;
 

@@ -109,6 +109,10 @@ static TTNode _TT_search( TTNode node, const char *s, Tree_Flags flags )
 {
     TTNode ptr = node;
 
+    if( !ptr || !s || !*s ) {
+        return NULL;
+    }
+
     while( *s && ( ptr && ( ptr->splitter || ptr->key ) ) ) {
         char c = ( flags & T_NOCASE ) ? tolower( *s ) : *s;
 
@@ -198,7 +202,13 @@ TTNodeConst TT_search( const TTree tree, const char *s )
 static TTNode _TT_insert( TTNode node, const char *s, size_t pos, void *data,
                           TTree tree, size_t depth )
 {
-    char c = ( tree->flags & T_NOCASE ) ? tolower( s[pos] ) : s[pos];
+    char c;
+
+    if( !tree || !tree->head || !s || !*s ) {
+        return NULL;
+    }
+
+    c = ( tree->flags & T_NOCASE ) ? tolower( s[pos] ) : s[pos];
 
     if( !node ) {
         node = _TT_create_node( c );
